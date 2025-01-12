@@ -44,7 +44,7 @@ const Navbar = () => {
                 <div className="bg-transparent p-2  rounded-sm">Join Now</div>
               </Link> */}
               <Link to="/signup">
-                <button className="cursor-pointer bg-white bg-opacity-10 p-3  w-auto h-10 flex justify-center items-center text-center space-x-2 rounded-full backdrop-blur-md shadow-lg hover:bg-opacity-15 ml-auto duration-300">
+                <button className="cursor-pointer bg-white bg-opacity-10 p-3  w-auto h-10 flex justify-center items-center text-center space-x-2 rounded-md backdrop-blur-md shadow-lg hover:bg-opacity-15 ml-auto duration-300">
                   Join Now
                 </button>
               </Link>

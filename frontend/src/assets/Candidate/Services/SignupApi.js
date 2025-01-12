@@ -1,7 +1,7 @@
 export const registerUser = async ({ name, email, password }) => {
   try {
     const response = await fetch(
-      "https://lexicon-lms-backend.onrender.com/auth/register",
+      "https://lexicon-lms.onrender.com/auth/register",
       {
         method: "POST",
         headers: {

@@ -56,17 +56,9 @@ const Login = () => {
         <h1 className="text-3xl font-bold">
           <span className="text-orange-400">L</span>EXICON
         </h1>
-        <div className="text-black flex justify-between space-x-7 ">
-          <span className=" p-3 rounded-md cursor-pointer h-10 flex justify-center items-center">
-            Login
-          </span>
-          <span className="bg-black text-white p-3 rounded-md cursor-pointer h-10 flex justify-center items-center">
-            Signup
-          </span>
-        </div>
       </div>
       <motion.main className="flex flex-col md:flex-row  w-[100%] h-screen p-0 md:p-0 justify-between">
-        <div className="text-black flex justify-center items-center  w-full md:w-[50%] mx-auto p-6 flex-col  ">
+        <div className="text-black flex justify-center items-center  w-full md:w-[50%] mx-auto p-6 flex-col bg-red-200   ">
           <div className="flex flex-col text-left space-y-4">
             <motion.h1
               initial="initial"
@@ -74,15 +66,15 @@ const Login = () => {
               exit="out"
               variants={pageVariants}
               transition={pageTransition}
-              className=" text-2xl font-bold "
+              className=" text-5xl font-bold "
             >
               Login
             </motion.h1>
-            <h1 className=" text-2xl font-bold">
+            <h1 className=" text-5xl font-bold">
               <span className="text-orange-400">Empower</span> Your Learning
               Journey{" "}
             </h1>
-            <h1 className=" text-2xl font-bold ">
+            <h1 className=" text-5xl font-bold ">
               Unlock Endless Possibilities!
             </h1>
             <div className="mt-32 text-sm flex font-semibold">

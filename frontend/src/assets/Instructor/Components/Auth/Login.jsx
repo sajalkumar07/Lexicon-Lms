@@ -53,23 +53,9 @@ const Login = () => {
   return (
     <div className="flex justify-center items-center  text-white">
       <div className="absolute top-0 left-0 p-4 text-white flex justify-between w-full ">
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold text-white">
           <span className="text-orange-400">L</span>EXICON
         </h1>
-        <div className="text-black flex justify-between space-x-7 ">
-          <span className=" p-3 rounded-md cursor-pointer h-10 flex justify-center items-center">
-            Login
-          </span>
-
-          <Link
-            to="/signup-instructor"
-            className="text-[#2414ff] cursor-pointer"
-          >
-            <h6>
-              <span className="text-black">you can </span>signup here{" "}
-            </h6>
-          </Link>
-        </div>
       </div>
       <motion.main className="flex flex-col md:flex-row  w-[100%] h-screen p-0 md:p-0 justify-between">
         <div className="text-black flex justify-center items-center  w-full md:w-[50%] mx-auto p-6 flex-col bg-red-200">
@@ -89,6 +75,20 @@ const Login = () => {
               Futures{" "}
             </h1>
             <h1 className=" text-5xl font-bold ">Your classroom, Your rules</h1>
+            <div className="mt-32 text-sm flex font-semibold">
+              {" "}
+              <p className=" text-black">
+                <h6>if you don't have an account</h6>
+                <Link
+                  to="/signup-instructor"
+                  className="text-[#2414ff] cursor-pointer"
+                >
+                  <h6>
+                    <span className="text-black">you can </span>signup here{" "}
+                  </h6>
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
 

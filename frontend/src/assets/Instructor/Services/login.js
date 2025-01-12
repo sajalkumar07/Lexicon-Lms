@@ -3,7 +3,7 @@ export const loginUser = async ({ email, password }) => {
     console.log("Login attempt:", { email, password }); // Log the email and password sent
 
     const response = await fetch(
-      "https://lexicon-lms-backend.onrender.com/instructor-auth/login",
+      "https://lexicon-lms.onrender.com/instructor-auth/login",
       {
         method: "POST",
         headers: {
