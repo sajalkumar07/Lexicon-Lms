@@ -12,6 +12,7 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import AddShoppingCartRoundedIcon from "@mui/icons-material/AddShoppingCartRounded";
 
 const GetCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -62,6 +63,7 @@ const GetCourses = () => {
             <div className="flex justify-between items-center w-full p-3">
               <span className=""></span>
               <span className="bg-gray-400 p-2 text-gray-400 font-semibold text-xs rounded-md">
+                <AddShoppingCartRoundedIcon fontSize="small" />
                 Add to Cart
               </span>
             </div>
@@ -84,9 +86,10 @@ const GetCourses = () => {
         </div>
         <div className="flex justify-between items-center w-full p-3">
           <span className="">4.5 ⭐</span>
-          <span className="bg-orange-400 p-2 text-white font-semibold text-xs rounded-md hover:shadow-lg cursor-pointer transition-all ">
+          <div className="bg-orange-400 p-2 text-white font-semibold text-xs rounded-md hover:shadow-lg cursor-pointer transition-all  flex justify-center items-center space-x-10">
+            <AddShoppingCartRoundedIcon fontSize="small" />
             Add to Cart
-          </span>
+          </div>
         </div>
       </div>
     ));
