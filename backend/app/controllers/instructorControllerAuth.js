@@ -1,6 +1,5 @@
 // controllers/instructorAuthControllers.js
 const Instructor = require("../models/InstructorSchema");
-const counter = require("../models/IdCounter");
 const jwt = require("jsonwebtoken");
 
 // Helper function to generate JWT
