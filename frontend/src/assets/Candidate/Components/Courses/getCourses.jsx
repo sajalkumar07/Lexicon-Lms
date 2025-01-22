@@ -21,17 +21,19 @@ const GetCourses = () => {
   const [value, setValue] = React.useState("1");
 
   //GET COURSES API
+
+  const loadCourses = async () => {
+    try {
+      const data = await fetchCourses();
+      setCourses(data);
+      setLoading(false);
+    } catch (error) {
+      setError("Failed to load courses");
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadCourses = async () => {
-      try {
-        const data = await fetchCourses();
-        setCourses(data);
-        setLoading(false);
-      } catch (error) {
-        setError("Failed to load courses");
-        setLoading(false);
-      }
-    };
     loadCourses();
   }, []);
 
