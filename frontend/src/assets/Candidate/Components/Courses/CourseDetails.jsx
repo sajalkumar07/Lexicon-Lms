@@ -89,6 +89,8 @@ const CourseDetails = () => {
   const [showFeedbackField, setShowFeedbackField] = useState(false);
 
   // Fetch course details, videos, and check purchase status on component mount
+  // Modified code for the useEffect that checks purchase status
+
   useEffect(() => {
     const loadCourseData = async () => {
       try {
@@ -107,35 +109,58 @@ const CourseDetails = () => {
         setCourse(courseData);
         setVideos(videosData.videos || []);
 
-        // Check localStorage for purchase status
-        const localPurchaseStatus = localStorage.getItem(
-          `course_purchased_${courseId}`
-        );
-        if (localPurchaseStatus === "true") {
-          setIsPurchased(true);
-          return; // Skip API call if already purchased according to localStorage
-        }
-
-        // Only check API if not already marked as purchased in localStorage
+        // Check if user is logged in
         if (authToken && userId) {
           try {
+            // First check API to get the authoritative purchase status
             const purchaseStatus = await checkIfPurchased(
               userId,
               courseId,
               authToken
             );
-            console.log("Purchase status response:", purchaseStatus);
 
             if (purchaseStatus.isPurchased) {
+              // Update localStorage with the server's response
               localStorage.setItem(`course_purchased_${courseId}`, "true");
               setIsPurchased(true);
             } else {
-              localStorage.setItem(`course_purchased_${courseId}`, "false");
-              setIsPurchased(false);
+              // If server says not purchased, check localStorage as fallback
+              // This handles the case where payment was successful but server verification failed
+              const localPurchaseStatus = localStorage.getItem(
+                `course_purchased_${courseId}`
+              );
+
+              if (localPurchaseStatus === "true") {
+                setIsPurchased(true);
+              } else {
+                localStorage.setItem(`course_purchased_${courseId}`, "false");
+                setIsPurchased(false);
+              }
             }
           } catch (purchaseErr) {
             console.error("Error checking purchase status:", purchaseErr);
-            // Fallback to localStorage if API fails
+
+            // If API call fails, fall back to localStorage
+            const localPurchaseStatus = localStorage.getItem(
+              `course_purchased_${courseId}`
+            );
+
+            if (localPurchaseStatus === "true") {
+              setIsPurchased(true);
+            } else {
+              setIsPurchased(false);
+            }
+          }
+        } else {
+          // If user is not logged in, just check localStorage
+          const localPurchaseStatus = localStorage.getItem(
+            `course_purchased_${courseId}`
+          );
+
+          if (localPurchaseStatus === "true") {
+            setIsPurchased(true);
+          } else {
+            setIsPurchased(false);
           }
         }
       } catch (err) {
@@ -238,7 +263,7 @@ const CourseDetails = () => {
       const { orderId, amount, currency } = orderData;
 
       const options = {
-        key: "rzp_test_29tDaxOsVy66E9",
+        key: "rzp_test_SK0O9AqxC5BPs5",
         amount,
         currency,
         name: "Course Enrollment",
@@ -604,7 +629,7 @@ const CourseDetails = () => {
                   disabled
                 >
                   <Check size={18} className="mr-2" />
-                  Already Purchased
+                  Already In you inventory
                 </button>
               ) : (
                 <button
@@ -740,7 +765,7 @@ const CourseDetails = () => {
                 {isPurchased ? (
                   <div className="w-full mt-4 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center">
                     <Check size={18} className="mr-2" />
-                    Already Purchased
+                    Already In you inventory
                   </div>
                 ) : (
                   <button
