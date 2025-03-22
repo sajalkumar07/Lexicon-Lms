@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import LoginPng from "../../images/programmer.png";
-import Loader from "../../images/spin-unscreen.gif"; // The loading GIF import
-import { loginUser } from "../../Services/LoginApi";
+import Loader from "../../images/spin-unscreen.gif";
+import { loginUser } from "../../Services/userAuth";
 
 const pageVariants = {
   initial: {
@@ -29,61 +28,79 @@ const pageTransition = {
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
-      // Replace this with your actual login function
+      // Call your existing login API
       const response = await loginUser({ email, password });
       console.log("Login successful:", response);
 
-      // Redirect to the home page ("/") after a successful login
+      // Extract user data from the response
+      const userData = {
+        email: email,
+        name: response.name || response.username || email.split("@")[0], // Use name from response or fall back to email username
+        avatar:
+          response.avatar ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            email.split("@")[0]
+          )}&background=random`, // Use avatar or generate one
+        token: response.token || localStorage.getItem("authToken"), // Use token from response or from localStorage
+      };
+
+      // Store user data for display in the navbar
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Redirect to the home page
       navigate("/");
     } catch (err) {
-      setError("Login failed. Please check your credentials.");
+      setError(err.message || "Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center  text-white">
-      <div className="absolute top-0 left-0 p-4 text-gray-400 flex justify-between w-full ">
-        <h1 className="text-3xl font-bold">
+    <div className="flex justify-center items-center text-white">
+      <div className="absolute top-0 left-0 p-4 text-gray-400 flex justify-between w-full">
+        <h1 className="text-3xl font-bold text-white hidden sm:block">
           <span className="text-orange-400">L</span>EXICON
         </h1>
       </div>
-      <motion.main className="flex flex-col md:flex-row  w-[100%] h-screen p-0 md:p-0 justify-between">
-        <div className="text-black flex justify-center items-center  w-full md:w-[50%] mx-auto p-6 flex-col bg-red-200   ">
-          <div className="flex flex-col text-left space-y-4">
+      <motion.main className="flex flex-col md:flex-row w-[100%] h-screen p-0 md:p-0 justify-between">
+        <div className="text-white flex justify-center items-center w-full md:w-[50%] mx-auto p-4 md:p-6 flex-col bg-gray-800">
+          <div className="flex flex-col text-left space-y-2 md:space-y-4">
             <motion.h1
               initial="initial"
               animate="in"
               exit="out"
               variants={pageVariants}
               transition={pageTransition}
-              className=" text-5xl font-bold "
+              className="text-3xl md:text-5xl font-bold"
             >
               Login
             </motion.h1>
-            <h1 className=" text-5xl font-bold">
+            <h1 className="text-2xl md:text-5xl font-bold">
               <span className="text-orange-400">Empower</span> Your Learning
               Journey{" "}
             </h1>
-            <h1 className=" text-5xl font-bold ">
+            <h1 className="text-2xl md:text-5xl font-bold">
               Unlock Endless Possibilities!
             </h1>
-            <div className="mt-32 text-sm flex font-semibold">
+            <div className="mt-8 md:mt-32 text-xs md:text-sm flex font-semibold">
               {" "}
-              <p className=" text-black">
+              <p className="text-white">
                 <h6>if you don't have an account</h6>
                 <Link to="/signup" className="text-[#2414ff] cursor-pointer">
                   <h6>
-                    <span className="text-black">you can </span>signup here{" "}
+                    <span className="text-white">you can </span>signup here{" "}
                   </h6>
                 </Link>
               </p>
@@ -97,10 +114,10 @@ const Login = () => {
           exit="out"
           variants={pageVariants}
           transition={pageTransition}
-          className="w-full md:w-[50%] h-full flex items-center justify-center p-0 md:p-0 "
+          className="w-full md:w-[50%] h-full flex items-center justify-center p-4 md:p-0"
         >
-          <div className="w-full md:w-[80%] justify-center flex flex-col items-center">
-            <div className="flex items-center justify-center font-semibold text-2xl text-black">
+          <div className="w-full sm:w-[90%] md:w-[80%] justify-center flex flex-col items-center">
+            <div className="flex items-center justify-center font-semibold text-xl md:text-2xl text-black">
               <h1>
                 Welcome Back!{" "}
                 <span className="text-glow">Let's Get You In!</span>
@@ -108,13 +125,19 @@ const Login = () => {
             </div>
 
             <form
-              className="mt-10 flex flex-col gap-5  justify-center w-[80%] "
+              className="mt-6 md:mt-10 flex flex-col gap-4 md:gap-5 justify-center w-[95%] sm:w-[90%] md:w-[80%]"
               onSubmit={handleLogin}
             >
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                  {error}
+                </div>
+              )}
+
               <div className="flex flex-col">
                 <label
                   htmlFor="email"
-                  className="mb-2 text-sm font-medium text-black "
+                  className="mb-2 text-sm font-medium text-black"
                 >
                   Email
                 </label>
@@ -152,8 +175,13 @@ const Login = () => {
               <button
                 type="submit"
                 className="bg-orange-500 text-white rounded-xl h-[50px] flex justify-center items-center mt-4"
+                disabled={isLoading}
               >
-                Login
+                {isLoading ? (
+                  <img src={Loader} alt="Loading" className="h-8 w-8" />
+                ) : (
+                  "Login"
+                )}
               </button>
             </form>
           </div>

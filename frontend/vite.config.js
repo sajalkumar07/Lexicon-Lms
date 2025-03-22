@@ -14,4 +14,9 @@ export default defineConfig({
       "@images": path.resolve(__dirname, "src/assets/Candidate/images"), // Fixed relative path
     },
   },
+  server: {
+    host: true, // or use '0.0.0.0'
+    port: 3001, // Change port if needed
+    strictPort: true, // If true, it will fail instead of trying the next available port
+  },
 });

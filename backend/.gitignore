@@ -1,2 +1,10 @@
 node_modules
 .env
+
+
+backend/app/config/firebase-key.json
+backend/app/config/firebase-config.js
+
+/app/config/firebase-key.json
+/app/config/firebase-config.js
+

@@ -3,10 +3,9 @@ import Landing from "./assets/CommonComponent/LandingPage";
 import Login from "./assets/Candidate/Components/Auth/Login";
 import Signup from "./assets/Candidate/Components/Auth/Signup";
 import Courses from "./assets/Candidate/Components/Courses/getCourses";
-import InstructorDashboard from "./assets/Instructor/Components/InstructorDashboard/DashboardMain";
-import CreateCourse from "./assets/Instructor/Components/InstructorDashboard/CreateCourse";
+import InstructorCourses from "./assets/Instructor/Components/InstructorDashboard/InstructorCourses";
 import Communication from "./assets/Instructor/Components/InstructorDashboard/Communication";
-import Performance from "./assets/Instructor/Components/InstructorDashboard/Performance";
+import Dashboard from "./assets/Instructor/Components/InstructorDashboard/Dashboard";
 import Help from "./assets/Instructor/Components/InstructorDashboard/Helps";
 import InstructorLogin from "./assets/Instructor/Components/Auth/Login";
 import InstructorSignin from "./assets/Instructor/Components/Auth/Signin";
@@ -19,10 +18,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/get-courses" element={<Courses />} />
-        <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
-        <Route path="/create-course" element={<CreateCourse />} />
+        <Route path="/instructor/courses" element={<InstructorCourses />} />
         <Route path="/communication" element={<Communication />} />
-        <Route path="/performance" element={<Performance />} />
+        <Route path="/instructor-dashboard" element={<Dashboard />} />
         <Route path="/help" element={<Help />} />
         <Route path="/login-instructor" element={<InstructorLogin />} />
         <Route path="/signup-instructor" element={<InstructorSignin />} />

@@ -3,8 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import LoginPng from "../../images/signup2.png";
-import { registerUser } from "../../Services/SignupApi";
+import { registerUser } from "../../Services/userAuth";
 
 const pageVariants = {
   initial: {
@@ -54,37 +53,37 @@ const Signup = () => {
   return (
     <div className="flex justify-center items-center text-white ">
       <div className="absolute top-0 left-0 p-4 text-gray-400 flex justify-between w-full">
-        <h1 className="text-3xl font-bold text-white">
+        <h1 className="text-3xl font-bold text-white hidden sm:block">
           <span className="text-orange-400">L</span>EXICON
-        </h1>
+        </h1>{" "}
       </div>
       <main className="flex flex-col md:flex-row w-[100%] h-screen p-0 md:p-0 justify-between">
-        <div className="text-black flex justify-center items-center  w-full md:w-[50%] mx-auto p-6 flex-col bg-red-200 ">
-          <div className="flex flex-col text-left space-y-4">
+        <div className="text-white flex justify-center items-center w-full md:w-[50%] mx-auto p-4 md:p-6 flex-col bg-gray-800">
+          <div className="flex flex-col text-left space-y-2 md:space-y-4">
             <motion.h1
               initial="initial"
               animate="in"
               exit="out"
               variants={pageVariants}
               transition={pageTransition}
-              className=" text-5xl font-bold "
+              className="text-3xl md:text-5xl font-bold"
             >
               Sign Up
             </motion.h1>
-            <h1 className=" text-5xl font-bold">
+            <h1 className="text-2xl md:text-5xl font-bold">
               <span className="text-orange-400">Empower</span> Your Learning
               Journey{" "}
             </h1>
-            <h1 className=" text-5xl font-bold ">
+            <h1 className="text-2xl md:text-5xl font-bold">
               Unlock Endless Possibilities!
             </h1>
-            <div className="mt-32 text-sm flex font-semibold">
+            <div className="mt-8 md:mt-32 text-xs md:text-sm flex font-semibold">
               {" "}
-              <p className=" text-black">
+              <p className="text-white">
                 <h6>if you already have an account</h6>
                 <Link to="/login" className="text-[#2414ff] cursor-pointer">
                   <h6>
-                    <span className="text-black">you can </span>login here{" "}
+                    <span className="text-white">you can </span>login here{" "}
                   </h6>
                 </Link>
               </p>
@@ -98,10 +97,10 @@ const Signup = () => {
           exit="out"
           variants={pageVariants}
           transition={pageTransition}
-          className="w-full md:w-[50%] h-full flex items-center justify-center p-0 md:p-0  "
+          className="w-full md:w-[50%] h-full flex items-center justify-center p-4 md:p-0"
         >
-          <div className="w-full md:w-[80%] justify-center flex flex-col items-center">
-            <div className="flex items-center justify-center font-semibold text-2xl text-black">
+          <div className="w-full sm:w-[90%] md:w-[80%] justify-center flex flex-col items-center">
+            <div className="flex items-center justify-center font-semibold text-xl md:text-2xl text-black text-center">
               <h1>
                 Be More Than a Spectator.{" "}
                 <span className="text-glow"> Join Us Today !</span>
@@ -109,7 +108,7 @@ const Signup = () => {
             </div>
 
             <form
-              className="mt-10 flex flex-col gap-5  justify-center w-[80%] "
+              className="mt-6 md:mt-10 flex flex-col gap-4 md:gap-5 justify-center w-[95%] sm:w-[90%] md:w-[80%]"
               onSubmit={handleSignup}
             >
               <div className="flex justify-center flex-col">

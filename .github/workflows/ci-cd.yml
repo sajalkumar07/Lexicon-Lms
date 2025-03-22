@@ -1,0 +1,25 @@
+name: Personal Project CI/CD
+
+on:
+  push:
+    branches:
+      - master # Jab bhi main branch par koi changes honge, pipeline trigger hoga
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Ubuntu environment mein pipeline run hoga
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2 # GitHub se code checkout karega
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14" # Aapke project ke liye Node.js version set karein
+
+      - name: Install Dependencies
+        run: npm install # Project dependencies install karega
+
+      - name: Run Tests
+        run: npm test # Aapke project ke test scripts run karega
