@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/authMiddleware");
-const { imageUpload } = require("../middlewares/uploadMiddleware");
 const courseController = require("../controllers/coursesControllers");
 
 // POST /courses - Create a new course (Instructors only)
 router.post(
   "/createCourse",
   protect,
-  imageUpload.single("image"), // Upload image
+
   courseController.createCourse
 );
 
