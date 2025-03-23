@@ -30,15 +30,40 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
   const [instructorName, setInstructorName] = useState("Instructor");
   const [instructorData, setInstructorData] = useState(null);
   const menuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
   const sidebarRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
 
   // Use localStorage to persist the expanded state
   const [isExpanded, setIsExpanded] = useState(() => {
     const savedState = localStorage.getItem("sidebarExpanded");
     return savedState ? JSON.parse(savedState) : false;
   });
+
+  // Function to control body scrolling
+  const controlBodyScroll = (disable) => {
+    if (disable) {
+      // Save the current scroll position
+      const scrollY = window.scrollY;
+      // Apply styles to fix the body in place
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden"; // Add this line to prevent scrolling
+      // Store the scroll position to restore later
+      document.body.dataset.scrollPosition = scrollY;
+    } else {
+      // Restore the scroll position
+      const scrollY = document.body.dataset.scrollPosition || 0;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.overflow = ""; // Remove the overflow property
+      window.scrollTo(0, parseInt(scrollY || "0"));
+    }
+  };
 
   // Check if screen is mobile
   useEffect(() => {
@@ -56,8 +81,19 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
     window.addEventListener("resize", checkMobile);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      // Make sure to restore body scroll when component unmounts
+      controlBodyScroll(false);
+    };
   }, []);
+
+  // Apply or remove body scroll lock when mobile sidebar state changes
+  useEffect(() => {
+    if (isMobile) {
+      controlBodyScroll(showMobileSidebar);
+    }
+  }, [isMobile, showMobileSidebar]);
 
   // Check if instructor data exists in localStorage
   useEffect(() => {
@@ -114,6 +150,12 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowProfileMenu(false);
       }
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target)
+      ) {
+        setShowMobileProfileMenu(false);
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -133,6 +175,7 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
       setUser(null);
       setHasInstructorData(false);
       setShowProfileMenu(false);
+      setShowMobileProfileMenu(false);
 
       // Refresh the page after logout
       window.location.reload();
@@ -145,7 +188,7 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
 
   const toggleSidebar = () => {
     if (isMobile) {
-      setShowMobileSidebar(!showMobileSidebar);
+      setShowMobileSidebar((prev) => !prev);
     } else {
       setIsExpanded((prevState) => !prevState);
     }
@@ -155,26 +198,100 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
     setShowProfileMenu(!showProfileMenu);
   };
 
+  const toggleMobileProfileMenu = () => {
+    setShowMobileProfileMenu(!showMobileProfileMenu);
+  };
+
   // Close mobile sidebar after navigation
   const handleNavigation = () => {
     if (isMobile) {
       setShowMobileSidebar(false);
+      setShowMobileProfileMenu(false);
     }
   };
 
   return (
     <>
-      {/* Mobile menu toggle button */}
-      {/* Mobile menu toggle button - only when sidebar is closed */}
-      {isMobile && !showMobileSidebar && (
-        <button
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 bg-gray-900 text-white p-2 rounded-md shadow-lg hover:bg-gray-800"
-          aria-label="Open menu"
-        >
-          <Menu size={20} />
-        </button>
+      {/* Mobile Header with Menu and Profile */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 right-0 bg-gray-900 text-white h-14 flex items-center justify-between px-4 z-40 shadow-md">
+          {/* Hamburger Menu / X Button Toggle */}
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-md hover:bg-gray-800"
+            aria-label={showMobileSidebar ? "Close menu" : "Toggle menu"}
+          >
+            {showMobileSidebar ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          {/* Logo */}
+          <div className="flex items-center">
+            <span className="text-2xl font-bold">
+              <span className="text-orange-400">L</span>exicon
+            </span>
+          </div>
+
+          {/* Profile Button */}
+          <div className="relative" ref={mobileMenuRef}>
+            {hasInstructorData ? (
+              <button
+                onClick={toggleMobileProfileMenu}
+                className="p-1 rounded-full hover:bg-gray-800"
+              >
+                <Avatar
+                  alt={instructorName}
+                  src={instructorData?.avatar || ""}
+                  sx={{ width: 32, height: 32 }}
+                />
+              </button>
+            ) : (
+              <Link
+                to="/login-instructor"
+                className="p-2 rounded-md hover:bg-gray-800 flex items-center"
+              >
+                <LogIn size={24} />
+              </Link>
+            )}
+
+            {/* Mobile Profile Dropdown */}
+            {showMobileProfileMenu && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                <div className="px-4 py-2 text-sm text-white border-b border-gray-700">
+                  <p className="font-medium">{instructorName}</p>
+                </div>
+                <Link
+                  to="/profile"
+                  className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
+                  onClick={handleNavigation}
+                >
+                  <User size={16} className="mr-2" />
+                  Profile
+                </Link>
+                <Link
+                  to="/settings"
+                  className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
+                  onClick={handleNavigation}
+                >
+                  <Settings size={16} className="mr-2" />
+                  Settings
+                </Link>
+                <div className="border-t border-gray-700 my-1"></div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                  disabled={isLoggingOut}
+                >
+                  <LogoutIcon className="mr-2" style={{ fontSize: "16px" }} />
+                  {isLoggingOut ? "Logging out..." : "Logout"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
+
+      {/* Content spacer when in mobile - pushes content down to make room for the header */}
+      {isMobile && <div className="h-14"></div>}
 
       {/* Sidebar */}
       <div
@@ -187,20 +304,9 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
               ? "translate-x-0 w-60"
               : "-translate-x-full"
             : "translate-x-0"
-        }`}
+        } ${isMobile ? "top-14" : "top-0"}`}
       >
         <aside className="bg-gray-900 text-white h-full w-full relative flex flex-col shadow-xl">
-          {/* Close button for mobile - inside the sidebar at the top-right */}
-          {isMobile && showMobileSidebar && (
-            <button
-              onClick={toggleSidebar}
-              className="absolute top-4 right-4 z-50  text-white p-2 "
-              aria-label="Close menu"
-            >
-              <X size={20} />
-            </button>
-          )}
-
           {/* Toggle button for desktop - positioned at the right edge */}
           {!isMobile && (
             <button
@@ -216,23 +322,27 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
             </button>
           )}
 
-          {/* Logo and Title */}
-          <div className="text-xl font-bold border-b border-white/20 h-16 flex items-center px-4">
-            <div className="flex items-center gap-2">
-              {isExpanded || (isMobile && showMobileSidebar) ? (
-                <span className="whitespace-nowrap text-2xl">
-                  <span className="text-orange-400">L</span>exicon
-                </span>
-              ) : (
-                <div className="space-x-1">
-                  <span className="text-2xl text-orange-400">L</span>
-                  <span className="text-2xl text-white">X</span>
-                </div>
-              )}
+          {/* Logo and Title - only show on desktop */}
+          {!isMobile && (
+            <div className="text-xl font-bold border-b border-white/20 h-16 flex items-center px-4">
+              <div className="flex items-center gap-2">
+                {isExpanded ? (
+                  <span className="whitespace-nowrap text-2xl">
+                    <span className="text-orange-400">L</span>exicon
+                  </span>
+                ) : (
+                  <div className="space-x-1">
+                    <span className="text-2xl text-orange-400">L</span>
+                    <span className="text-2xl text-white">X</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          <nav className="pt-8 flex flex-col flex-grow">
+          <nav
+            className={`${isMobile ? "pt-4" : "pt-8"} flex flex-col flex-grow`}
+          >
             {/* Dashboard */}
             <div className="mb-6">
               <Link to="/instructor-dashboard" onClick={handleNavigation}>
@@ -350,7 +460,7 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
             {/* Spacer to push user profile/login to bottom */}
             <div className="flex-grow"></div>
 
-            {/* User Profile Section at bottom when logged in */}
+            {/* User Profile Section at bottom when logged in - only show in sidebar in desktop mode or when mobile sidebar is open */}
             {hasInstructorData ? (
               <div className="mt-auto mb-4 relative" ref={menuRef}>
                 <button

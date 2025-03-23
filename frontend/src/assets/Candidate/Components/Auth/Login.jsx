@@ -45,8 +45,8 @@ const Login = () => {
 
       // Extract user data from the response
       const userData = {
-        email: email,
-        name: response.name || response.username || email.split("@")[0], // Use name from response or fall back to email username
+        email: response.user.email,
+        name: response.user.name, // Use name from response or fall back to email username
         avatar:
           response.avatar ||
           `https://ui-avatars.com/api/?name=${encodeURIComponent(
