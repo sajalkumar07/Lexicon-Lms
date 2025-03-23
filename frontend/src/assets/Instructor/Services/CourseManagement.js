@@ -57,3 +57,31 @@ export const createCourse = async (courseData) => {
     throw error;
   }
 };
+
+//delete courses api
+export const deleteCourse = async (courseId) => {
+  try {
+    const token = localStorage.getItem("authToken") || "";
+
+    const response = await fetch(
+      `${config.apiUrl}/api/courses/deleteCourse/${courseId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to delete course");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting course:", error);
+    throw error;
+  }
+};

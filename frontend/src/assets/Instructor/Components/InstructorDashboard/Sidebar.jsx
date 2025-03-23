@@ -311,13 +311,13 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
           {!isMobile && (
             <button
               onClick={toggleSidebar}
-              className="absolute -right-3 top-12 bg-gray-900 rounded-r-md h-8 w-6 flex items-center justify-center shadow-2xl z-50"
+              className="absolute -right-3 top-12 bg-[#D7DBE4] rounded-full h-8 w-8 flex items-center justify-center shadow-2xl "
               aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
             >
               {isExpanded ? (
-                <ChevronLeft size={16} className="text-white" />
+                <ChevronLeft size={16} className="text-gray-900" />
               ) : (
-                <ChevronRight size={16} className="text-white" />
+                <ChevronRight size={16} className="text-gray-900" />
               )}
             </button>
           )}
