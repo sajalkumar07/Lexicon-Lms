@@ -24,7 +24,7 @@ const courseSchema = new mongoose.Schema(
     instructor: {
       type: String,
     },
-    imageUrl: { type: String },
+    thumbnail: { type: String },
   },
   { timestamps: true }
 );

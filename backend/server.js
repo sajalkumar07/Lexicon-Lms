@@ -6,6 +6,8 @@ const authRoutes = require("./app/routes/auth");
 const instructorAuth = require("./app/routes/instructorAuth");
 const courseRoutes = require("./app/routes/coursesRoutes");
 const corsOptions = require("./app/config/config");
+const imageRoutes = require("./app/routes/imageRoutes");
+const videoRoutes = require("./app/routes/videoRoutes");
 
 dotenv.config();
 const app = express();
@@ -21,6 +23,8 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/instructor-auth", instructorAuth);
+app.use("/api", imageRoutes);
+app.use("/api", videoRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -46,7 +46,7 @@ const DashboardLayout = ({ children }) => {
             : "ml-16 px-6"
         }`}
       >
-        <div className={`pt-4 ${isMobile ? "pt-20" : ""}`}>{children}</div>
+        <div className={`pt-4 ${isMobile ? "pt-16" : ""}`}>{children}</div>
       </main>
     </div>
   );
