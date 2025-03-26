@@ -114,7 +114,7 @@ const Navbar = () => {
   return (
     <div>
       <main className="">
-        <nav className="fixed top-0 left-0 w-full p-3 bg-opacity-50 backdrop-blur-sm bg-gray-900 z-40 text-white">
+        <nav className="fixed top-0 left-0 w-full p-3 bg-opacity-85 backdrop-blur-sm bg-gray-900 z-40 text-white">
           <header className="flex justify-between items-center h-8">
             <div className="flex items-center bg-gray-900 rounded-md p-2">
               <h1 className="text-xl font-bold text-white">
@@ -218,7 +218,7 @@ const Navbar = () => {
                 </div>
               ) : (
                 <Link to="/signup">
-                  <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+                  <button className="px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600">
                     Join Now
                   </button>
                 </Link>
