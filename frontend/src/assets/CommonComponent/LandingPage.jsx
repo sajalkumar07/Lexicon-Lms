@@ -1,6 +1,11 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useState } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
 import Navbar from "./Navbar";
 import Computer from "./Images/3d-portrait-peoplee-removebg-preview.png";
 import Computer2 from "./Images/3d-rendering.png";
@@ -10,12 +15,17 @@ import {
   Sprout,
   Lightbulb,
   GraduationCap,
+  ChevronDown,
+  Quote,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AnimatedKnowledgeGlobe from "./AnimatedGlobe";
+import DataVisualizationSection from "./DataVisualization";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [activeAccordion, setActiveAccordion] = useState(null);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
@@ -57,6 +67,66 @@ const LandingPage = () => {
         "Innovative approaches that transform learning for the digital age.",
     },
   ];
+
+  const testimonials = [
+    {
+      name: "Sarah Johnson",
+      role: "Senior Software Engineer",
+      company: "TechInnovate",
+      text: "Lexicon completely transformed my career trajectory. The personalized learning paths and real-world project approach are game-changers.",
+      achievement: "Promoted to Senior Engineer within 6 months",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      background: "bg-purple-100",
+      textColor: "text-purple-900",
+    },
+    {
+      name: "Mike Rodriguez",
+      role: "Web Development Freelancer",
+      company: "Global Solutions",
+      text: "The depth of content and expert-led courses gave me the confidence to launch my own freelance career. Lexicon is more than just a learning platform - it's a career accelerator.",
+      achievement: "Increased income by 120% after course completion",
+      avatar: "https://randomuser.me/api/portraits/men/46.jpg",
+      background: "bg-blue-100",
+      textColor: "text-blue-900",
+    },
+    {
+      name: "Emily Chen",
+      role: "Data Science Specialist",
+      company: "AI Frontiers",
+      text: "What sets Lexicon apart is their cutting-edge curriculum that stays ahead of industry trends. I've gained skills that are immediately applicable in real-world scenarios.",
+      achievement: "Landed dream job at a top AI research firm",
+      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+      background: "bg-green-100",
+      textColor: "text-green-900",
+    },
+  ];
+
+  const accordionItems = [
+    {
+      title: "How do Lexicon courses work?",
+      content:
+        "Our courses are fully online, self-paced, and designed by industry experts. You'll get access to video lectures, coding exercises, and real-world projects.",
+    },
+    {
+      title: "What technology stacks do you cover?",
+      content:
+        "We offer comprehensive courses in web development, data science, machine learning, cloud computing, and more. From Python to React, we've got you covered.",
+    },
+    {
+      title: "Can I get a certificate after completing a course?",
+      content:
+        "Yes! Upon successful completion of a course, you'll receive a verified certificate that you can share with potential employers.",
+    },
+    {
+      title: "Are there any prerequisites for the courses?",
+      content:
+        "Most of our courses are designed for beginners, but we also offer advanced tracks. Each course description clearly outlines the recommended background.",
+    },
+  ];
+
+  const toggleAccordion = (index) => {
+    setActiveAccordion(activeAccordion === index ? null : index);
+  };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -185,25 +255,222 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className="relative bg-white flex justify-center items-center py-16">
-          <div className="grid md:grid-cols-3 gap-8 w-full max-w-7xl px-4">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="flex justify-center items-center flex-col text-center p-6 space-y-4"
-              >
-                <feature.icon
-                  className={`${feature.iconClass} rounded-full p-3`}
-                  size={48}
-                />
-                <h2 className="text-xl font-bold text-gray-800">
-                  {feature.title}
-                </h2>
-                <p className="text-base text-gray-600">{feature.description}</p>
+        {/* counter */}
+        <DataVisualizationSection />
+
+        {/* Features and Testimonials Container */}
+        <div
+          className="relative bg-blue-100 p-16"
+          style={{
+            backgroundImage: `
+      linear-gradient(to right, rgba(147, 97, 210, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(147, 97, 210, 0.1) 1px, transparent 1px)
+    `,
+            backgroundSize: "25px 25px",
+          }}
+        >
+          {/* Features */}
+          <section className="flex justify-center items-center ">
+            <div className="grid md:grid-cols-3 gap-8 w-full max-w-7xl px-4">
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="flex justify-center items-center flex-col text-center p-6 space-y-4"
+                >
+                  <feature.icon
+                    className={`${feature.iconClass} rounded-full p-3`}
+                    size={48}
+                  />
+                  <h2 className="text-xl font-bold text-gray-800">
+                    {feature.title}
+                  </h2>
+                  <p className="text-base text-gray-600">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Testimonials */}
+          <section className="mt-12">
+            <div className="max-w-6xl mx-auto px-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+                What Our <span className="text-orange-500">Learners</span> Say
+              </h2>
+              <div className="grid md:grid-cols-3 gap-8">
+                {testimonials.map((testimonial, index) => (
+                  <div
+                    key={index}
+                    className="bg-white p-6 rounded-lg shadow-2xl border-gray-100 border transition-all duration-300 hover:rotate-3 hover:border-purple-500"
+                  >
+                    <Quote className="text-orange-500 mb-4" size={36} />
+                    <p className="text-gray-600 mb-4 italic">
+                      {testimonial.text}
+                    </p>
+                    <div className="flex items-center">
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full mr-4"
+                      />
+                      <div>
+                        <h3 className="font-semibold text-gray-800">
+                          {testimonial.name}
+                        </h3>
+                        <p className="text-gray-500 text-sm">
+                          {testimonial.role}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          </section>
+        </div>
+
+        {/* FAQ */}
+        <section className="relative bg-white py-16">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+              Frequently Asked{" "}
+              <span className="text-purple-500">Questions</span>
+            </h2>
+            <div className="space-y-4">
+              {accordionItems.map((item, index) => (
+                <div key={index} className="border-b border-gray-200 pb-2">
+                  <motion.button
+                    onClick={() => toggleAccordion(index)}
+                    className="w-full flex justify-between items-center text-left p-4 "
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="font-semibold text-gray-800">
+                      {item.title}
+                    </span>
+                    <motion.div
+                      animate={{
+                        rotate: activeAccordion === index ? 180 : 0,
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ChevronDown />
+                    </motion.div>
+                  </motion.button>
+                  <AnimatePresence>
+                    {activeAccordion === index && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{
+                          opacity: 1,
+                          height: "auto",
+                          transition: {
+                            duration: 0.2,
+                            ease: "easeInOut",
+                          },
+                        }}
+                        exit={{
+                          opacity: 0,
+                          height: 0,
+                          transition: {
+                            duration: 0.3,
+                            ease: "easeInOut",
+                          },
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 py-3 text-gray-600">
+                          {item.content}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
+
+        {/* Footer */}
+        <footer className="relative bg-gray-900 text-white py-12">
+          <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-2xl font-bold mb-4 text-orange-500">
+                LEXICON
+              </h3>
+              <p className="text-gray-400">
+                Empowering learners through innovative online education.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/" className="hover:text-orange-500">
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/courses" className="hover:text-orange-500">
+                    Courses
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/instructors" className="hover:text-orange-500">
+                    Instructors
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" className="hover:text-orange-500">
+                    About Us
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/contact" className="hover:text-orange-500">
+                    Contact Us
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/faq" className="hover:text-orange-500">
+                    FAQ
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy" className="hover:text-orange-500">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/terms" className="hover:text-orange-500">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Connect With Us</h4>
+              <div className="flex space-x-4">
+                <a href="#" className="hover:text-orange-500">
+                  Twitter
+                </a>
+                <a href="#" className="hover:text-orange-500">
+                  LinkedIn
+                </a>
+                <a href="#" className="hover:text-orange-500">
+                  Facebook
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="text-center mt-8 border-t border-gray-800 pt-6 text-gray-500">
+            © 2025 Lexicon. All Rights Reserved.
+          </div>
+        </footer>
       </main>
     </div>
   );
