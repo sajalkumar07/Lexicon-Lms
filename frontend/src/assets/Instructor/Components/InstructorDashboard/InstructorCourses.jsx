@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
-import Loader from "../../../CommonComponent/Loader";
+import Loader from "../../../Utils/Loader";
 import { BookOpen } from "lucide-react";
 import {
   fetchAllInstructorCourses,

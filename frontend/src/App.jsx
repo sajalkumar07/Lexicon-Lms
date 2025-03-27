@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Landing from "./assets/CommonComponent/LandingPage";
+import Landing from "./assets/Utils/LandingPage";
 import Login from "./assets/Candidate/Components/Auth/Login";
 import Signup from "./assets/Candidate/Components/Auth/Signup";
 import Courses from "./assets/Candidate/Components/Courses/getCourses";

@@ -76,7 +76,7 @@ const AnimatedCounter = ({ end, duration = 2 }) => {
 const GlobalImpactCard = ({ icon: Icon, end, label, color }) => {
   return (
     <motion.div
-      className="bg-white rounded-xl shadow-lg p-6 text-center transform transition-all"
+      className="bg-gradient-to-br from-orange-100 to-orange-300  rounded-xl shadow-xl  p-6 text-center transform transition-all"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -87,14 +87,14 @@ const GlobalImpactCard = ({ icon: Icon, end, label, color }) => {
         <Icon className="text-current" size={32} />
       </div>
       <AnimatedCounter end={end} />
-      <p className="text-gray-600 font-medium mt-2">{label}</p>
+      <p className="text-black font-medium mt-2">{label}</p>
     </motion.div>
   );
 };
 
 const DataVisualizationSection = () => {
   return (
-    <section className="relative bg-white py-12 md:py-16 px-6">
+    <section className="relative bg-white py-12 md:py-32 px-6">
       <div className="mx-auto max-w-6xl">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800">
           Our <span className="text-orange-500">Global</span> Impact

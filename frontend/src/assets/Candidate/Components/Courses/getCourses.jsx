@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../../CommonComponent/Navbar";
+import Navbar from "../../../Utils/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import Cat from "../../../Instructor/images/cat.jpg";
@@ -7,7 +7,7 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Loader from "../../../CommonComponent/Loader";
+import Loader from "../../../Utils/Loader";
 import { fetchAllCourses } from "../../Services/getCourses";
 
 const GetCourses = () => {

@@ -15,7 +15,7 @@ import Avatar from "@mui/material/Avatar";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import { logoutUser } from "../Candidate/Services/userAuth";
-import Loader from "../CommonComponent/Loader";
+import Loader from "../Utils/Loader";
 
 const Navbar = () => {
   const [fabOpen, setFabOpen] = useState(false);
@@ -285,8 +285,8 @@ const Navbar = () => {
                 </div>
               ) : (
                 <Link to="/signup">
-                  <button className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600">
-                    Join
+                  <button className="px-3 py-1 bg-orange-500  text-white rounded-full text-sm hover:bg-orange-600">
+                    Join Now
                   </button>
                 </Link>
               )}
