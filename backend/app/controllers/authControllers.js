@@ -16,15 +16,29 @@ const generateToken = (res, id) => {
 
 // Register a new user
 exports.registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, secondName, email, password, confirmPassword } = req.body;
 
   try {
+    if (!name || !email || !password || !confirmPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({
+      name,
+      secondName,
+      email,
+      password,
+      confirmPassword,
+    });
     generateToken(res, user._id);
 
     res.status(201).json({
@@ -32,6 +46,9 @@ exports.registerUser = async (req, res) => {
       user: { name: user.name, email: user.email },
     });
   } catch (error) {
+    if (error.message === "Passwords do not match") {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
     res.status(500).json({ message: error.message || "Server error" });
   }
 };
@@ -44,8 +61,10 @@ exports.loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
       // Generate token
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-      
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
       // Set cookie
       res.cookie("jwt", token, {
         httpOnly: true,
@@ -53,16 +72,16 @@ exports.loginUser = async (req, res) => {
         sameSite: "strict",
         maxAge: 3600000, // 1 hour
       });
-      
+
       // Return token and user info in response
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: "Login successful",
         token,
         user: {
           id: user._id,
           name: user.name,
-          email: user.email
-        }
+          email: user.email,
+        },
       });
     }
     res.status(401).json({ message: "Invalid credentials" });

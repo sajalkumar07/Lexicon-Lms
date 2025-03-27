@@ -16,9 +16,17 @@ const generateToken = (res, id) => {
 
 // Register a new instructor
 exports.registerInstructor = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, secondName, email, password, confirmPassword } = req.body;
 
   try {
+    if (!name || !email || !password || !confirmPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
     const instructorExists = await Instructor.findOne({ email });
     if (instructorExists) {
       return res.status(400).json({ message: "Instructor already exists" });
@@ -27,10 +35,13 @@ exports.registerInstructor = async (req, res) => {
     const instructorId = `INSTRUCTOR-${Date.now()}`; // Generate a unique ID
     const instructor = await Instructor.create({
       name,
+      secondName,
       email,
       password,
+      confirmPassword,
       instructorId,
     });
+
     generateToken(res, instructor._id);
 
     res.status(201).json({
@@ -42,6 +53,10 @@ exports.registerInstructor = async (req, res) => {
       },
     });
   } catch (error) {
+    // Handle specific validation errors
+    if (error.message === "Passwords do not match") {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
     res.status(500).json({ message: error.message || "Server error" });
   }
 };
