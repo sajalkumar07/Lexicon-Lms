@@ -16,10 +16,10 @@ const generateToken = (res, id) => {
 
 // Register a new instructor
 exports.registerInstructor = async (req, res) => {
-  const { name, secondName, email, password, confirmPassword } = req.body;
+  const { firstName, lastName, email, password, confirmPassword } = req.body;
 
   try {
-    if (!name || !email || !password || !confirmPassword) {
+    if (!firstName || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -34,8 +34,8 @@ exports.registerInstructor = async (req, res) => {
 
     const instructorId = `INSTRUCTOR-${Date.now()}`; // Generate a unique ID
     const instructor = await Instructor.create({
-      name,
-      secondName,
+      firstName,
+      lastName,
       email,
       password,
       confirmPassword,
@@ -47,7 +47,8 @@ exports.registerInstructor = async (req, res) => {
     res.status(201).json({
       msg: "Instructor successfully created",
       instructor: {
-        name: instructor.name,
+        firstName: instructor.firstName,
+        lastName: instructor.lastName,
         email: instructor.email,
         instructorId: instructor.instructorId,
       },
@@ -87,8 +88,10 @@ exports.loginInstructor = async (req, res) => {
         token,
         instructor: {
           id: instructor._id,
-          name: instructor.name,
           email: instructor.email,
+          firstName: instructor.firstName,
+          lastName: instructor.lastName,
+          fullName: `${instructor.firstName} ${instructor.lastName}`,
           instructorId: instructor.instructorId,
         },
       });

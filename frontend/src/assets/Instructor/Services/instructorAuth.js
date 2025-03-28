@@ -27,7 +27,13 @@ export const loginUser = async ({ email, password }) => {
   }
 };
 
-export const registerUser = async ({ name, email, password }) => {
+export const registerUser = async ({
+  firstName,
+  lastName,
+  email,
+  password,
+  confirmPassword,
+}) => {
   try {
     const response = await fetch(
       `${config.apiUrl}/api/instructor-auth/register`,
@@ -36,7 +42,13 @@ export const registerUser = async ({ name, email, password }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }), // wrap all fields in an object
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+          confirmPassword,
+        }), // wrap all fields in an object
       }
     );
 

@@ -16,10 +16,10 @@ const generateToken = (res, id) => {
 
 // Register a new user
 exports.registerUser = async (req, res) => {
-  const { name, secondName, email, password, confirmPassword } = req.body;
+  const { firstName, lastName, email, password, confirmPassword } = req.body;
 
   try {
-    if (!name || !email || !password || !confirmPassword) {
+    if (!firstName || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -33,8 +33,8 @@ exports.registerUser = async (req, res) => {
     }
 
     const user = await User.create({
-      name,
-      secondName,
+      firstName,
+      lastName,
       email,
       password,
       confirmPassword,
@@ -43,7 +43,11 @@ exports.registerUser = async (req, res) => {
 
     res.status(201).json({
       msg: "User successfully created",
-      user: { name: user.name, email: user.email },
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
     });
   } catch (error) {
     if (error.message === "Passwords do not match") {
@@ -79,7 +83,9 @@ exports.loginUser = async (req, res) => {
         token,
         user: {
           id: user._id,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          fullName: `${user.firstName} ${user.lastName}`,
           email: user.email,
         },
       });

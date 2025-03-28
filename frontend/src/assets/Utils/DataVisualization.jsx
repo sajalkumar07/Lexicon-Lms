@@ -1,44 +1,8 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from "recharts";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 import { Users, GraduationCap, Globe } from "lucide-react";
-
-// Sample data for visualizations
-const courseCompletionData = [
-  { name: "Web Development", value: 45 },
-  { name: "Data Science", value: 30 },
-  { name: "Machine Learning", value: 25 },
-];
-
-const learnerStatsData = [
-  { name: "Active Learners", count: 50000 },
-  { name: "Courses Completed", count: 12500 },
-  { name: "Countries Reached", count: 120 },
-];
-
-const studyHeatmapData = [
-  { hour: "6 AM", intensity: 20 },
-  { hour: "9 AM", intensity: 45 },
-  { hour: "12 PM", intensity: 70 },
-  { hour: "3 PM", intensity: 60 },
-  { hour: "6 PM", intensity: 80 },
-  { hour: "9 PM", intensity: 55 },
-];
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
 const AnimatedCounter = ({ end, duration = 2 }) => {
   const [count, setCount] = useState(0);
@@ -76,7 +40,7 @@ const AnimatedCounter = ({ end, duration = 2 }) => {
 const GlobalImpactCard = ({ icon: Icon, end, label, color }) => {
   return (
     <motion.div
-      className="bg-gradient-to-br from-orange-100 to-orange-300  rounded-xl shadow-xl  p-6 text-center transform transition-all"
+      className="bg-gradient-to-br from-blue-100 to-blue-200  rounded-xl shadow-xl  p-6 text-center transform transition-all"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

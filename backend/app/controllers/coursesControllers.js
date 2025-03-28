@@ -94,14 +94,14 @@ exports.getInstructorCourses = async (req, res) => {
       });
     }
 
-    console.log("Instructor found:", instructor.name);
+    console.log("Instructor found:", instructor.firstName);
 
     // Find courses directly using the ID from the token
     const courses = await Course.find({ instructor: instructorId }).populate(
       "instructor"
     );
     console.log(
-      `Found ${courses.length} courses for instructor ${instructor.name}`
+      `Found ${courses.length} courses for instructor ${instructor.firstName}`
     );
 
     res.status(200).json({

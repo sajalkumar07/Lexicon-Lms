@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { registerUser } from "../../Services/userAuth";
+import { registerUser } from "../../Services/instructorAuth";
 
 const pageVariants = {
   initial: {
@@ -47,7 +47,7 @@ const Signup = () => {
       });
       console.log("signup successful", response);
 
-      navigate("/login");
+      navigate("/login-instructor");
     } catch (err) {
       setError("Signup failed. Invalid credentials.");
     } finally {
@@ -56,11 +56,11 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex justify-center items-center text-white ">
-      <div className="absolute top-0 left-0 p-4 text-gray-400 flex justify-between w-full">
+    <div className="flex justify-center items-center text-white">
+      <div className="absolute top-0 left-0 p-4 text-white flex justify-between w-full">
         <h1 className="text-3xl font-bold text-white hidden sm:block">
           <span className="text-orange-400">L</span>EXICON
-        </h1>{" "}
+        </h1>
       </div>
       <main className="flex flex-col md:flex-row w-[100%] h-screen p-0 md:p-0 justify-between">
         <div className="text-white flex justify-center items-center w-full md:w-[50%] mx-auto p-4 md:p-6 flex-col bg-gray-800">
@@ -104,8 +104,8 @@ const Signup = () => {
           transition={pageTransition}
           className="w-full md:w-[50%] h-full flex items-center justify-center p-4 md:p-0"
         >
-          <div className="w-full sm:w-[90%] md:w-[80%] justify-center flex flex-col items-center">
-            <div className="flex items-center justify-center font-semibold text-xl md:text-2xl text-black text-center">
+          <div className="w-full md:w-[80%] justify-center flex flex-col items-center">
+            <div className="flex items-center justify-center font-semibold text-xl md:text-2xl text-black">
               <h1>
                 Be More Than a Spectator.{" "}
                 <span className="text-glow"> Join Us Today !</span>
@@ -113,7 +113,7 @@ const Signup = () => {
             </div>
 
             <form
-              className="mt-6 md:mt-10 flex flex-col gap-4 md:gap-5 justify-center w-[95%] sm:w-[90%] md:w-[80%]"
+              className="mt-6 md:mt-10 flex flex-col gap-4 md:gap-5 justify-center w-[90%] md:w-[80%]"
               onSubmit={handleSignup}
             >
               <div className="flex justify-between items-center ">
@@ -163,7 +163,7 @@ const Signup = () => {
                 <input
                   type="email"
                   placeholder="you@example.com"
-                  className="h-[50px] p-5 rounded-xl bg-slate-100 outline-none text-black  "
+                  className="h-[45px] md:h-[50px] p-4 md:p-5 rounded-xl outline-none bg-slate-100 text-black"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -180,7 +180,7 @@ const Signup = () => {
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className="h-[50px] p-5 rounded-xl bg-slate-100 outline-none text-black"
+                  className="h-[45px] md:h-[50px] p-4 md:p-5 rounded-xl outline-none bg-slate-100 text-black"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -197,7 +197,7 @@ const Signup = () => {
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className="h-[50px] p-5 rounded-xl bg-slate-100 outline-none text-black"
+                  className="h-[45px] md:h-[50px] p-4 md:p-5 rounded-xl outline-none bg-slate-100 text-black"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -209,7 +209,7 @@ const Signup = () => {
               )}
               <button
                 type="submit"
-                className="bg-orange-500 text-white rounded-xl h-[50px] flex justify-center items-center mt-4"
+                className="bg-orange-500 text-white rounded-xl h-[45px] md:h-[50px] flex justify-center items-center mt-4"
               >
                 Signup
               </button>

@@ -47,7 +47,7 @@ const Navbar = () => {
   useEffect(() => {
     // Check if user is logged in from localStorage or session
     const checkLoginStatus = () => {
-      const userData = localStorage.getItem("user");
+      const userData = localStorage.getItem("userData");
       if (userData) {
         setIsLoggedIn(true);
         setUser(JSON.parse(userData));
@@ -91,7 +91,7 @@ const Navbar = () => {
     setIsLoggingOut(true);
     try {
       await logoutUser(); // Call the updated logout function
-      localStorage.removeItem("user"); // Remove user data
+      localStorage.removeItem("userData"); // Remove user data
       setIsLoggedIn(false);
       setUser(null);
       setShowProfileMenu(false);

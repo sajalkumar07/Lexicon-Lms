@@ -147,8 +147,8 @@ const LandingPage = () => {
               transition={{ duration: 0.8, ease: "easeOut" }}
               onClick={handleInstructorClick}
             >
-              <h1 className="cursor-pointer text-white font-semibold pl-4 text-sm sm:text-base">
-                Become Instructor
+              <h1 className="cursor-pointer text-white font-semibold  text-sm sm:text-base">
+                Start Learning
               </h1>
               <span className="text-white bg-orange-600 rounded-full p-1 mr-1">
                 <ArrowRight size={18} />

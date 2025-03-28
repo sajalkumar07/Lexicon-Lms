@@ -8,7 +8,7 @@ import Communication from "./assets/Instructor/Components/InstructorDashboard/Co
 import Dashboard from "./assets/Instructor/Components/InstructorDashboard/Dashboard";
 import Help from "./assets/Instructor/Components/InstructorDashboard/Helps";
 import InstructorLogin from "./assets/Instructor/Components/Auth/Login";
-import InstructorSignin from "./assets/Instructor/Components/Auth/Signin";
+import InstructorSignin from "./assets/Instructor/Components/Auth/Signup";
 
 function App() {
   return (
