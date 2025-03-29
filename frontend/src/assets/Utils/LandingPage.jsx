@@ -1,12 +1,6 @@
-/* eslint-disable react/no-unknown-property */
 /* eslint-disable no-unused-vars */
 import React, { useState } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  AnimatePresence,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./Navbar";
 import Computer from "./Images/3d-portrait-peoplee-removebg-preview.png";
 import Computer2 from "./Images/3d-rendering.png";
@@ -18,10 +12,15 @@ import {
   GraduationCap,
   ChevronDown,
   Quote,
+  Check,
+  BookOpenCheck,
+  CreditCard,
+  UsersRound,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AnimatedKnowledgeGlobe from "./AnimatedGlobe";
 import DataVisualizationSection from "./DataVisualization";
+import Instructor from "./Images/view-3d-businessman.jpg";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -29,7 +28,8 @@ const LandingPage = () => {
 
   const handleInstructorClick = () => {
     const authToken = localStorage.getItem("authToken");
-    if (authToken) {
+    const instructorData = localStorage.getItem("instructorData");
+    if (authToken && instructorData) {
       navigate("/instructor-dashboard");
     } else {
       navigate("/login-instructor");
@@ -116,6 +116,59 @@ const LandingPage = () => {
     },
   ];
 
+  const instructorFeatures = [
+    {
+      title: "Share Your Expertise",
+      content:
+        "Turn your knowledge into impact by creating courses that reach thousands of eager learners worldwide. Our platform makes it easy to structure and publish your content.",
+      icon: <BookOpenCheck className="w-6 h-6 text-purple-500" />,
+    },
+    {
+      title: "Earn Additional Income",
+      content:
+        "Generate a sustainable revenue stream through our competitive instructor compensation model. Top instructors on Lexicon earn significant monthly income from their courses.",
+      icon: <CreditCard className="w-6 h-6 text-purple-500" />,
+    },
+    {
+      title: "Join Our Community",
+      content:
+        "Become part of a growing network of industry experts and educators. Collaborate, learn, and grow alongside other passionate instructors.",
+      icon: <UsersRound className="w-6 h-6 text-purple-500" />,
+    },
+  ];
+
+  const steps = [
+    {
+      number: 1,
+      title: "Seamless Learning Experience",
+      description:
+        "Access courses effortlessly with an intuitive platform designed for easy navigation.",
+      features: [
+        "User-friendly interface",
+        "Learn at your own pace",
+        "Engaging video content",
+      ],
+    },
+    {
+      number: 2,
+      title: "Stay Motivated & Interactive",
+      description:
+        "Engage with interactive lessons, live sessions, and gamified challenges to keep learning fun.",
+      features: ["Live Q&A sessions", "Discussion forums", "Quizzes & rewards"],
+    },
+    {
+      number: 3,
+      title: "Track Your Progress & Improve",
+      description:
+        "Stay on top of your learning journey with detailed insights and progress tracking.",
+      features: [
+        "Personalized dashboards",
+        "Real-time performance tracking",
+        "AI-powered study recommendations",
+      ],
+    },
+  ];
+
   const toggleAccordion = (index) => {
     setActiveAccordion(activeAccordion === index ? null : index);
   };
@@ -127,7 +180,7 @@ const LandingPage = () => {
       <main className="relative z-10">
         {/* Hero Section */}
 
-        <header className="min-h-screen flex items-center bg-gradient-to-br from-gray-900 to-black justify-center relative px-4">
+        <header className="min-h-screen flex items-center   bg-gradient-to-br from-gray-900 to-black  justify-center relative px-4">
           <div className="fixed inset-0 z-0 overflow-hidden">
             <AnimatedKnowledgeGlobe className="" interactive={true} />
           </div>
@@ -145,7 +198,6 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              onClick={handleInstructorClick}
             >
               <h1 className="cursor-pointer text-white font-semibold  text-sm sm:text-base">
                 Start Learning
@@ -158,7 +210,16 @@ const LandingPage = () => {
         </header>
 
         {/* Feature Block */}
-        <section className="relative bg-gradient-to-br from-gray-900 to-black space-y-1 overflow-hidden">
+        <section
+          className="relative bg-gradient-to-br bg-gray-900 to-black space-y-1 overflow-hidden"
+          style={{
+            backgroundImage: `
+      linear-gradient(to right, rgba(147, 97, 210, 0.1) 0.1px, transparent 1px),
+      linear-gradient(to bottom, rgba(147, 97, 210, 0.1) 0.1px, transparent 1px)
+    `,
+            backgroundSize: "25px 25px",
+          }}
+        >
           <div className="flex justify-center items-center px-4">
             <div className="flex flex-col md:flex-row justify-between items-center p-3 w-full max-w-6xl space-y-8 md:space-y-0 md:space-x-8">
               <div className="space-y-5 order-2 md:order-1 text-center md:text-left w-full md:w-1/2">
@@ -236,7 +297,7 @@ const LandingPage = () => {
           >
             <path
               fill="#ffffff"
-              fill-opacity="1"
+              fillOpacity="1"
               d="M0,64L30,69.3C60,75,120,85,180,101.3C240,117,300,139,360,165.3C420,192,480,224,540,213.3C600,203,660,149,720,112C780,75,840,53,900,37.3C960,21,1020,11,1080,16C1140,21,1200,43,1260,58.7C1320,75,1380,85,1410,90.7L1440,96L1440,320L1410,320C1380,320,1320,320,1260,320C1200,320,1140,320,1080,320C1020,320,960,320,900,320C840,320,780,320,720,320C660,320,600,320,540,320C480,320,420,320,360,320C300,320,240,320,180,320C120,320,60,320,30,320L0,320Z"
             />
           </svg>
@@ -280,37 +341,54 @@ const LandingPage = () => {
             </div>
           </section>
 
-          {/* Testimonials */}
-          <section className="mt-12">
-            <div className="max-w-6xl mx-auto px-4">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-                What Our <span className="text-orange-500">Learners</span> Say
-              </h2>
+          <section className=" text-black p-16 ">
+            <div className="max-w-7xl mx-auto ">
+              <div className="text-center  mb-16">
+                <h2 className="text-2xl md:text-4xl font-bold mb-4 text-black">
+                  How <span className="text-orange-500">Lexicon</span> Works
+                </h2>
+                <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto">
+                  Our simple yet powerful platform makes learning management
+                  effortless and effective.
+                </p>
+              </div>
+
               <div className="grid md:grid-cols-3 gap-8">
-                {testimonials.map((testimonial, index) => (
+                {steps.map((step, index) => (
                   <div
                     key={index}
-                    className="bg-white p-6 rounded-lg shadow-lg border-gray-100 border transition-all duration-300 hover:rotate-3 hover:shadow-orange-500 hover:shadow-2xl hover:border-orange-500"
+                    className="relative bg-white rounded-lg p-8 shadow-2xl"
                   >
-                    <Quote className="text-orange-500 mb-4" size={36} />
-                    <p className="text-gray-600 mb-4 italic">
-                      {testimonial.text}
-                    </p>
-                    <div className="flex items-center">
-                      <img
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        className="w-12 h-12 rounded-full mr-4"
-                      />
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {testimonial.name}
-                        </h3>
-                        <p className="text-gray-500 text-sm">
-                          {testimonial.role}
-                        </p>
+                    <div className="absolute -top-8 -left-6">
+                      <div className="bg-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold">
+                        {step.number}
                       </div>
                     </div>
+
+                    <h3 className="text-2xl font-bold mt-6 mb-4">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-800 mb-6">{step.description}</p>
+
+                    <ul className="space-y-3">
+                      {step.features.map((feature, featureIndex) => (
+                        <li
+                          key={featureIndex}
+                          className="flex items-start space-x-2"
+                        >
+                          <span className="text-blue-500 mt-1">
+                            <Check size={18} />
+                          </span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {index < steps.length - 1 && (
+                      <div className="hidden md:block absolute -right-4 top-1/2 transform -translate-y-1/2 z-10">
+                        <ArrowRight size={30} className="text-blue-500" />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -318,20 +396,114 @@ const LandingPage = () => {
           </section>
         </div>
 
-        {/* FAQ */}
-        <section className="relative bg-white py-16">
-          <div className="max-w-4xl mx-auto px-4">
+        {/* Testimonials */}
+        <section className=" relative bg-white p-16">
+          <div className="max-w-6xl mx-auto p-2">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+              What Our <span className="text-orange-500">Learners</span> Say
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="bg-white p-6 rounded-lg shadow-lg border-gray-100 border transition-all duration-300 hover:rotate-3 hover:shadow-orange-500 hover:shadow-2xl hover:border-orange-500"
+                >
+                  <Quote className="text-orange-500 mb-4" size={36} />
+                  <p className="text-gray-600 mb-4 italic">
+                    {testimonial.text}
+                  </p>
+                  <div className="flex items-center">
+                    <img
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">
+                        {testimonial.name}
+                      </h3>
+                      <p className="text-gray-500 text-sm">
+                        {testimonial.role}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Become Instructor Section - FIXED */}
+        <section
+          className="relative bg-gray-900 text-white md:p-0 p-8  "
+          style={{
+            backgroundImage: `
+    linear-gradient(to right, rgba(147, 97, 210, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(147, 97, 210, 0.1) 1px, transparent 1px)
+  `,
+            backgroundSize: "25px 25px",
+          }}
+        >
+          <div className="max-w-7xl mx-auto py-8 flex flex-col md:flex-row gap-8">
+            {/* Left Column - Features */}
+            <div className="md:w-1/2 flex flex-col justify-center">
+              <h2 className="text-3xl font-bold mb-8">Become Instructor</h2>
+
+              <div className="space-y-6">
+                {instructorFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-start">
+                    <div className="p-3 rounded-lg mr-4 flex-shrink-0">
+                      {feature.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-300">{feature.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                <button
+                  className="cursor-pointer bg-white bg-opacity-10 p-3 mt-5 mx-auto md:mr-auto md:ml-0 w-auto h-18 text-center space-x-4 rounded-full backdrop-blur-md shadow-lg hover:bg-opacity-15 duration-300 text-white flex justify-between items-center"
+                  onClick={handleInstructorClick}
+                >
+                  Become a Mentor
+                  <span className="text-white rounded-full bg-orange-600 p-2 ml-4">
+                    <ArrowRight size={18} />
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column - Image */}
+            <div className="md:w-1/2 mt-8 md:mt-0">
+              <div className="relative rounded-lg overflow-hidden  h-full flex items-center justify-center">
+                <img
+                  src={Instructor}
+                  className="w-full h-auto object-cover rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="relative bg-white p-16">
+          <div className="max-w-4xl mx-auto p-2">
+            <h2 className="text-2xl md:text-4xl font-bold text-center mb-12 text-gray-800">
               Frequently Asked{" "}
               <span className="text-purple-500">Questions</span>
             </h2>
             <div className="space-y-4">
               {accordionItems.map((item, index) => (
-                <div key={index} className="border-b border-gray-200 pb-2">
+                <div key={index} className=" bg-gray-100  pb-2">
                   <motion.button
                     onClick={() => toggleAccordion(index)}
                     className="w-full flex justify-between items-center text-left p-4 "
-                    whileTap={{ scale: 0.98 }}
+                    whileTap={{ scale: 0.99 }}
                   >
                     <span className="font-semibold text-gray-800">
                       {item.title}
@@ -353,7 +525,7 @@ const LandingPage = () => {
                           opacity: 1,
                           height: "auto",
                           transition: {
-                            duration: 0.2,
+                            duration: 0.3,
                             ease: "easeInOut",
                           },
                         }}

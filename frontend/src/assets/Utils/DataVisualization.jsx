@@ -40,7 +40,7 @@ const AnimatedCounter = ({ end, duration = 2 }) => {
 const GlobalImpactCard = ({ icon: Icon, end, label, color }) => {
   return (
     <motion.div
-      className="bg-gradient-to-br from-blue-100 to-blue-200  rounded-xl shadow-xl  p-6 text-center transform transition-all"
+      className="bg-gradient-to-br from-blue-100 to-blue-200  rounded-md shadow-md  p-6 text-center "
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

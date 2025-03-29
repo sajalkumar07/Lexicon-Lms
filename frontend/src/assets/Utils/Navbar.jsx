@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 // import IconButton from "@mui/material/IconButton";
 import Backdrop from "@mui/material/Backdrop";
 import Zoom from "@mui/material/Zoom";
@@ -26,6 +26,9 @@ const Navbar = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const menuRef = useRef(null);
   // const navigate = useNavigate();
+
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState("/");
 
   // Check if screen is mobile size
   useEffect(() => {
@@ -56,6 +59,11 @@ const Navbar = () => {
 
     checkLoginStatus();
   }, []);
+
+  // Set active tab based on current location
+  useEffect(() => {
+    setActiveTab(location.pathname);
+  }, [location]);
 
   // Close the profile menu when clicking outside
   useEffect(() => {
@@ -103,12 +111,25 @@ const Navbar = () => {
     }
   };
 
+  const handleNavClick = (path) => {
+    setActiveTab(path);
+  };
+
   const fabItems = [
     { icon: <HomeIcon />, label: "Home", link: "/" },
     { icon: <SchoolIcon />, label: "Courses", link: "/get-courses" },
-    { icon: <InfoIcon />, label: "About", link: "/" },
-    { icon: <ArticleIcon />, label: "Blog", link: "/" },
-    { icon: <WorkIcon />, label: "Career", link: "/" },
+    { icon: <InfoIcon />, label: "About", link: "/about" },
+    { icon: <ArticleIcon />, label: "Blog", link: "/blog" },
+    { icon: <WorkIcon />, label: "Career", link: "/career" },
+  ];
+
+  // Navigation items for desktop
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "Courses", path: "/get-courses" },
+    { name: "About", path: "/about" },
+    { name: "Blog", path: "/blog" },
+    { name: "Career", path: "/career" },
   ];
 
   return (
@@ -126,30 +147,23 @@ const Navbar = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:block">
               <ul className="flex justify-between items-center gap-8">
-                <Link to="/">
-                  <li className="relative group cursor-pointer">
-                    Home
-                    <span className="absolute left-1/2 bottom-0 block w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300 transform -translate-x-1/2"></span>
-                  </li>
-                </Link>
-                <Link to="/get-courses">
-                  <li className="relative group cursor-pointer">
-                    <span className="absolute left-1/2 bottom-0 block w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300 transform -translate-x-1/2"></span>
-                    Courses
-                  </li>
-                </Link>
-                <li className="relative group cursor-pointer">
-                  <span className="absolute left-1/2 bottom-0 block w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300 transform -translate-x-1/2"></span>
-                  About
-                </li>
-                <li className="relative group cursor-pointer">
-                  <span className="absolute left-1/2 bottom-0 block w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300 transform -translate-x-1/2"></span>
-                  Blog
-                </li>
-                <li className="relative group cursor-pointer">
-                  <span className="absolute left-1/2 bottom-0 block w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300 transform -translate-x-1/2"></span>
-                  Career
-                </li>
+                {navItems.map((item) => (
+                  <Link to={item.path} key={item.path}>
+                    <li
+                      className="relative group cursor-pointer"
+                      onClick={() => handleNavClick(item.path)}
+                    >
+                      {item.name}
+                      <span
+                        className={`absolute left-1/2 bottom-0 block h-[2px] bg-white transform -translate-x-1/2 transition-all duration-300 ${
+                          activeTab === item.path
+                            ? "w-full"
+                            : "w-0 group-hover:w-full"
+                        }`}
+                      ></span>
+                    </li>
+                  </Link>
+                ))}
               </ul>
             </div>
 
@@ -161,18 +175,28 @@ const Navbar = () => {
                     className="flex items-center gap-2 cursor-pointer"
                     onClick={toggleProfileMenu}
                   >
-                    <span className="text-white">{user.name}</span>
+                    <span className="text-white text-xs">{user.name}</span>
+
                     <Avatar
-                      alt={user?.name || "User"}
-                      src={user?.avatar || ""}
-                      sx={{ width: 32, height: 32 }}
-                      className="cursor-pointer"
+                      alt={user.name || "User"}
+                      src={user.avatar || ""}
+                      sx={{ width: 30, height: 30 }}
+                      className="cursor-pointer "
                     />
                   </div>
 
                   {/* Profile dropdown menu */}
                   {showProfileMenu && (
                     <div className="absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                      <div className="px-4 py-3 border-b border-gray-700">
+                        <p className="text-sm font-medium text-white">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {user.email || "user@example.com"}
+                        </p>
+                      </div>
+
                       <Link
                         to="/profile"
                         className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
@@ -217,7 +241,7 @@ const Navbar = () => {
                   )}
                 </div>
               ) : (
-                <Link to="/signup">
+                <Link to="/login">
                   <button className="px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600">
                     Join Now
                   </button>
@@ -240,6 +264,14 @@ const Navbar = () => {
                   {/* Mobile Profile dropdown menu */}
                   {showProfileMenu && (
                     <div className="absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                      <div className="px-4 py-3 border-b border-gray-700">
+                        <p className="text-sm font-medium text-white">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {user.email || "user@example.com"}
+                        </p>
+                      </div>
                       <Link
                         to="/profile"
                         className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
@@ -284,7 +316,7 @@ const Navbar = () => {
                   )}
                 </div>
               ) : (
-                <Link to="/signup">
+                <Link to="/login">
                   <button className="px-3 py-1 bg-orange-500  text-white rounded-full text-sm hover:bg-orange-600">
                     Join Now
                   </button>
@@ -350,7 +382,10 @@ const Navbar = () => {
                 <Fab
                   component={Link}
                   to={item.link}
-                  onClick={closeFab}
+                  onClick={() => {
+                    closeFab();
+                    setActiveTab(item.link);
+                  }}
                   size="small"
                   color="secondary"
                   aria-label={item.label}
@@ -359,10 +394,10 @@ const Navbar = () => {
                     bottom: 16 + (index + 1) * 60,
                     right: 16,
                     zIndex: 50,
-                    bgcolor: "#1f2937", // Gray background
+                    bgcolor: activeTab === item.link ? "#f97316" : "#1f2937", // Orange if active, gray otherwise
                     color: "white",
                     "&:hover": {
-                      bgcolor: "#111827",
+                      bgcolor: activeTab === item.link ? "#ea580c" : "#111827",
                     },
                   }}
                 >
@@ -382,6 +417,8 @@ const Navbar = () => {
                 }`}
                 style={{
                   bottom: 16 + (index + 1) * 60,
+                  borderLeft:
+                    activeTab === item.link ? "2px solid #f97316" : "none",
                 }}
               >
                 {item.label}
