@@ -16,83 +16,14 @@ import {
   Trash2,
 } from "lucide-react";
 import Loader from "../../Utils/Loader";
-
-// Mock API functions - Replace with actual implementations
-const fetchCourseDetails = async (courseId) => {
-  // Implementation to fetch course details
-  const response = await fetch(
-    `http://localhost:8080/api/courses/course/${courseId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch course details");
-  }
-
-  return await response.json();
-};
-
-const fetchCourseVideos = async (courseId) => {
-  // Implementation to fetch course videos
-  const response = await fetch(
-    `http://localhost:8080/api/courses/course/${courseId}/videos`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch course videos");
-  }
-
-  return await response.json();
-};
-
-const addVideoLecture = async (courseId, videoData) => {
-  // Implementation to add a new video lecture
-  const response = await fetch(
-    `http://localhost:8080/api/courses/course/${courseId}/videos`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(videoData),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to add video lecture");
-  }
-
-  return await response.json();
-};
-
-const deleteVideoLecture = async (courseId, videoId) => {
-  // Implementation to delete a video lecture
-  const response = await fetch(
-    `http://localhost:8080/api/courses/course/${courseId}/videos/${videoId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to delete video lecture");
-  }
-
-  return await response.json();
-};
+import {
+  fetchCourseDetails,
+  fetchCourseVideos,
+  addVideoLecture,
+  deleteVideoLecture,
+  updateVideoLecture,
+} from "../Services/CourseManagement";
+import DashboardLayout from "../Components/InstructorDashboard/DashboardLayout";
 
 // Format seconds to hours:minutes:seconds
 const formatDuration = (seconds) => {
@@ -110,7 +41,14 @@ const formatDuration = (seconds) => {
 };
 
 // Add Video Modal Component
-const AddVideoModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
+const AddVideoModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  isSubmitting,
+  editMode = false,
+  initialData = {},
+}) => {
   const [videoData, setVideoData] = useState({
     title: "",
     description: "",
@@ -120,6 +58,19 @@ const AddVideoModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
   });
 
   const [errors, setErrors] = useState({});
+
+  // Initialize with data if in edit mode
+  useEffect(() => {
+    if (editMode && initialData) {
+      setVideoData({
+        title: initialData.title || "",
+        description: initialData.description || "",
+        videoUrl: initialData.videoUrl || "",
+        videoThumbnail: initialData.videoThumbnail || "",
+        duration: initialData.duration || 0,
+      });
+    }
+  }, [editMode, initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -176,7 +127,7 @@ const AddVideoModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
               <Video size={24} className="text-blue-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900">
-              Add New Video Lecture
+              {editMode ? "Edit Video Lecture" : "Add New Video Lecture"}
             </h3>
           </div>
           <button
@@ -314,16 +265,16 @@ const AddVideoModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-gray-900  rounded-md font-medium transition-colors flex items-center"
+              className="px-4 py-2 text-white bg-gray-900 rounded-md font-medium transition-colors flex items-center"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Saving...
+                  {editMode ? "Updating..." : "Saving..."}
                 </>
               ) : (
-                <>Add Video</>
+                <>{editMode ? "Update Video" : "Add Video"}</>
               )}
             </button>
           </div>
@@ -419,6 +370,8 @@ const CourseDetailsPage = () => {
   const [videoToDelete, setVideoToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [videoToEdit, setVideoToEdit] = useState(null);
 
   // Fetch course details and videos on component mount
   useEffect(() => {
@@ -469,6 +422,15 @@ const CourseDetailsPage = () => {
     setDeleteModalOpen(true);
   };
 
+  // Open edit modal
+  const openEditModal = (e, video) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    setVideoToEdit(video);
+    setEditMode(true);
+    setIsAddModalOpen(true);
+  };
+
   // Handle video deletion
   const confirmDeleteVideo = async () => {
     if (!videoToDelete) return;
@@ -491,25 +453,54 @@ const CourseDetailsPage = () => {
     }
   };
 
-  // Handle adding a new video lecture
-  const handleAddVideo = async (videoData) => {
+  // Handle adding or updating a video lecture
+  const handleVideoSubmit = async (videoData) => {
     try {
       setIsSubmitting(true);
       setSubmitError(null);
 
-      const newVideo = await addVideoLecture(courseId, videoData);
+      if (editMode && videoToEdit) {
+        // Update existing video
+        const updatedVideo = await updateVideoLecture(
+          courseId,
+          videoToEdit._id,
+          videoData
+        );
 
-      // Add the new video to the videos list
-      setVideos([...videos, newVideo]);
+        // Update the videos list with the edited video
+        setVideos(
+          videos.map((video) =>
+            video._id === videoToEdit._id ? updatedVideo : video
+          )
+        );
+      } else {
+        // Add new video
+        const newVideo = await addVideoLecture(courseId, videoData);
+        setVideos([...videos, newVideo]);
+      }
 
-      // Close the add modal
+      // Close the modal and reset state
       setIsAddModalOpen(false);
+      setEditMode(false);
+      setVideoToEdit(null);
     } catch (err) {
-      setSubmitError(err.message || "Failed to add video lecture");
-      console.error("Error adding video lecture:", err);
+      setSubmitError(
+        err.message || `Failed to ${editMode ? "update" : "add"} video lecture`
+      );
+      console.error(
+        `Error ${editMode ? "updating" : "adding"} video lecture:`,
+        err
+      );
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Open add video modal (reset edit mode)
+  const openAddVideoModal = () => {
+    setEditMode(false);
+    setVideoToEdit(null);
+    setIsAddModalOpen(true);
   };
 
   if (isLoading) {
@@ -545,9 +536,9 @@ const CourseDetailsPage = () => {
           <p>The requested course could not be found.</p>
           <button
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            onClick={() => window.close()}
+            onClick={() => window.history.back()}
           >
-            Close
+            Go Back
           </button>
         </div>
       </div>
@@ -555,10 +546,10 @@ const CourseDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout className="min-h-screen bg-gray-50">
       {/* Course Header */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <header className="  bg-white border-b shadow-sm">
+        <div className=" max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 ">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="mb-4 md:mb-0">
               <div className="flex items-center mb-2">
@@ -577,7 +568,7 @@ const CourseDetailsPage = () => {
               </div>
               <button
                 className="bg-gray-900 text-white px-4 py-2 rounded-md shadow-sm font-medium flex items-center"
-                onClick={() => setIsAddModalOpen(true)}
+                onClick={openAddVideoModal}
               >
                 <Plus size={18} className="mr-1" />
                 Add Video
@@ -585,7 +576,7 @@ const CourseDetailsPage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Error Alert */}
       {(submitError || deleteError) && (
@@ -613,11 +604,11 @@ const CourseDetailsPage = () => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4">Course Details</h2>
 
-              {course.thumbnail ? (
+              {course.courseThumbnail ? (
                 <img
-                  src={course.thumbnail}
+                  src={course.courseThumbnail}
                   alt={course.title}
-                  className="w-full h-48 object-cover rounded-md mb-4"
+                  className="w-full h-48 object-cover mb-4 rounded"
                 />
               ) : (
                 <div className="w-full h-48 bg-gray-100 rounded-md flex items-center justify-center mb-4">
@@ -654,13 +645,13 @@ const CourseDetailsPage = () => {
           </div>
 
           {/* Video Lectures */}
-          <div className="lg:col-span-2">
-            <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="lg:col-span-2 px-2">
+            <div className="bg-white p-6 rounded-lg shadow-md overflow-auto h-[80vh]">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold">Video Lectures</h2>
                 <button
-                  className="bg-gray-900  text-white px-3 py-1 rounded-md shadow-sm text-sm font-medium flex items-center"
-                  onClick={() => setIsAddModalOpen(true)}
+                  className="bg-gray-900 text-white px-3 py-1 rounded-md shadow-sm text-sm font-medium flex items-center"
+                  onClick={openAddVideoModal}
                 >
                   <Plus size={16} className="mr-1" />
                   Add Video
@@ -680,7 +671,7 @@ const CourseDetailsPage = () => {
                   </p>
                   <button
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md hover:shadow-xl duration-300 text-white bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setIsAddModalOpen(true)}
+                    onClick={openAddVideoModal}
                   >
                     <Plus size={16} className="mr-2" />
                     Add your first video
@@ -745,11 +736,7 @@ const CourseDetailsPage = () => {
                                     <li>
                                       <button
                                         className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          // Handle edit functionality
-                                          console.log("Edit video:", video._id);
-                                        }}
+                                        onClick={(e) => openEditModal(e, video)}
                                       >
                                         <Pencil size={16} className="mr-2" />
                                         Edit
@@ -800,12 +787,18 @@ const CourseDetailsPage = () => {
         </div>
       </div>
 
-      {/* Add Video Modal */}
+      {/* Add/Edit Video Modal */}
       <AddVideoModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handleAddVideo}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditMode(false);
+          setVideoToEdit(null);
+        }}
+        onSubmit={handleVideoSubmit}
         isSubmitting={isSubmitting}
+        editMode={editMode}
+        initialData={videoToEdit}
       />
 
       {/* Delete Confirmation Modal */}
@@ -819,7 +812,7 @@ const CourseDetailsPage = () => {
         videoTitle={videoToDelete?.title || ""}
         isDeleting={isDeleting}
       />
-    </div>
+    </DashboardLayout>
   );
 };
 

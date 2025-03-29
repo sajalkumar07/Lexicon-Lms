@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/authMiddleware");
 const courseController = require("../controllers/coursesControllers");
-const mediaController = require("../controllers/mediaController");
 
 // POST /courses - Create a new course (Instructors only)
 router.post("/createCourse", protect, courseController.createCourse);

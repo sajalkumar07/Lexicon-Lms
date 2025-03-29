@@ -1,8 +1,8 @@
-/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
-import DashboardLayout from "./DashboardLayout"; // Adjust path as needed
+import { Link, useNavigate } from "react-router-dom";
+import DashboardLayout from "./DashboardLayout";
 import {
   CirclePlus,
   MoreVertical,
@@ -10,18 +10,20 @@ import {
   Trash2,
   AlertTriangle,
   X,
+  BookOpen,
+  GridIcon,
+  ListIcon,
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import Loader from "../../../Utils/Loader";
-import { BookOpen } from "lucide-react";
 import {
   fetchAllInstructorCourses,
   deleteCourse,
-} from "../../Services/CourseManagement"; // Updated import
+} from "../../Services/CourseManagement";
 import CreateCoursePopup from "../../DashboardComponents/createCoursePopup";
 
-// Delete Confirmation Modal Component
+// Delete Confirmation Modal Component remains the same
 const DeleteConfirmationModal = ({
   isOpen,
   onClose,
@@ -94,7 +96,7 @@ const DeleteConfirmationModal = ({
 };
 
 const InstructorCourses = () => {
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -104,6 +106,8 @@ const InstructorCourses = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
+  // Add state for view type (grid or list)
+  const [viewType, setViewType] = useState("grid");
 
   // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -156,14 +160,19 @@ const InstructorCourses = () => {
     setSearchTerm(e.target.value);
   };
 
+  // Toggle view type between grid and list
+  const toggleViewType = () => {
+    setViewType(viewType === "grid" ? "list" : "grid");
+  };
+
   // Navigate to course details page
   const navigateToCourseDetails = (courseId) => {
-    navigate(`/instructor/courses/${courseId}`);
+    window.open(`/instructor/courses/${courseId}`, "_blank");
   };
 
   // Toggle dropdown menu
   const toggleMenu = (e, courseId) => {
-    e.stopPropagation(); // Prevent document click from immediately closing the menu
+    e.stopPropagation();
     setOpenMenuId(openMenuId === courseId ? null : courseId);
   };
 
@@ -204,20 +213,19 @@ const InstructorCourses = () => {
   const handleEditCourse = (e, courseId) => {
     e.stopPropagation();
     setOpenMenuId(null);
-    // Add your edit course logic here
     console.log("Edit course:", courseId);
   };
 
-  // Render a course card
+  // Render a course card for grid view
   const CourseCard = ({ course }) => (
     <div
-      className="bg-white rounded-lg shadow-md overflow-hidden border w-72 border-gray-200 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      className="bg-white rounded-lg shadow-md overflow-hidden border  border-gray-200 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
       onClick={() => navigateToCourseDetails(course._id)}
     >
       <div className="h-40 bg-gray-200 relative">
-        {course.thumbnail ? (
+        {course.courseThumbnail ? (
           <img
-            src={course.thumbnail}
+            src={course.courseThumbnail}
             alt={course.title}
             className="w-full h-full object-cover"
           />
@@ -273,7 +281,7 @@ const InstructorCourses = () => {
         {/* Course category */}
         <p className="text-sm text-gray-600 mb-2">{course.category}</p>
 
-        {/* Course description - now from API */}
+        {/* Course description */}
         <p className="text-sm text-gray-500 mb-4">
           {course.description || "No description available."}
         </p>
@@ -284,13 +292,107 @@ const InstructorCourses = () => {
           <button
             className="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2 font-semibold rounded-md text-sm"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent navigation when clicking on the button
-              // Add your publish logic here
+              e.stopPropagation();
               console.log("Publish course:", course._id);
             }}
           >
             Publish
           </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Render a course row for list view
+  const CourseListItem = ({ course }) => (
+    <div
+      className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer w-full mb-3"
+      onClick={() => navigateToCourseDetails(course._id)}
+    >
+      <div className="flex flex-col sm:flex-row">
+        {/* Course thumbnail / icon */}
+        <div className="sm:w-48 h-40 sm:h-full bg-gray-200 relative">
+          {course.courseThumbnail ? (
+            <img
+              src={course.courseThumbnail}
+              alt={course.title}
+              className="w-full h-full object-cover rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none">
+              <BookOpen size={40} className="text-gray-400" />
+              <div className="absolute top-0 right-0 bg-blue-500 rounded-bl text-white font-semibold text-xs px-2 py-1">
+                {course.difficulty}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Course details */}
+        <div className="p-4 flex-grow flex flex-col justify-between w-full">
+          <div>
+            <div className="flex justify-between items-start mb-1">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">
+                  {course.title}
+                </h3>
+                <p className="text-sm text-gray-600">{course.category}</p>
+              </div>
+              <div className="relative">
+                <button
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                  onClick={(e) => toggleMenu(e, course._id)}
+                >
+                  <MoreVertical size={18} className="text-gray-600" />
+                </button>
+
+                {/* Dropdown menu */}
+                {openMenuId === course._id && (
+                  <div className="absolute right-0 mt-1 w-36 bg-white shadow-lg rounded-md z-10 border border-gray-200">
+                    <ul className="py-1">
+                      <li>
+                        <button
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                          onClick={(e) => handleEditCourse(e, course._id)}
+                        >
+                          <Pencil size={16} className="mr-2" />
+                          Edit
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                          onClick={(e) => openDeleteModal(e, course)}
+                        >
+                          <Trash2 size={16} className="mr-2" />
+                          Delete
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Course description */}
+            <p className="text-sm text-gray-500 my-2">
+              {course.description || "No description available."}
+            </p>
+          </div>
+
+          {/* Price and publish button */}
+          <div className="flex justify-between items-center mt-2">
+            <div className="font-bold text-lg">₹{course.price}</div>
+            <button
+              className="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2 font-semibold rounded-md text-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log("Publish course:", course._id);
+              }}
+            >
+              Publish
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -315,6 +417,32 @@ const InstructorCourses = () => {
                   <FontAwesomeIcon icon={faMagnifyingGlass} />
                 </div>
               </div>
+            </div>
+
+            {/* View toggle */}
+            <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+              <button
+                className={`p-2 ${
+                  viewType === "grid"
+                    ? "bg-gray-900 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setViewType("grid")}
+                aria-label="Grid view"
+              >
+                <GridIcon size={18} />
+              </button>
+              <button
+                className={`p-2 ${
+                  viewType === "list"
+                    ? "bg-gray-900 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setViewType("list")}
+                aria-label="List view"
+              >
+                <ListIcon size={18} />
+              </button>
             </div>
 
             <button
@@ -377,11 +505,21 @@ const InstructorCourses = () => {
             )}
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => (
-              <CourseCard key={course._id} course={course} />
-            ))}
-          </div>
+          <>
+            {viewType === "grid" ? (
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCourses.map((course) => (
+                  <CourseCard key={course._id} course={course} />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-8">
+                {filteredCourses.map((course) => (
+                  <CourseListItem key={course._id} course={course} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
