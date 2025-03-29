@@ -184,7 +184,7 @@ const LandingPage = () => {
           <div className="fixed inset-0 z-0 overflow-hidden">
             <AnimatedKnowledgeGlobe className="" interactive={true} />
           </div>
-          <motion.div className="text-center text-white px-4 z-20 relative max-w-4xl mx-auto">
+          <div className="text-center text-white px-4 z-20 relative max-w-4xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
               Shape Your Future with{" "}
               <span className="text-orange-500">LEXICON</span>
@@ -193,20 +193,15 @@ const LandingPage = () => {
               Unlock Your Potential Through Innovative Learning
             </p>
 
-            <motion.button
-              className="cursor-pointer bg-white bg-opacity-10 p-3 space-x-4 flex justify-between items-center rounded-full backdrop-blur-md shadow-lg hover:bg-opacity-15 duration-300 mx-auto"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
+            <button className="cursor-pointer bg-white bg-opacity-10 p-3 space-x-4 flex justify-between items-center rounded-full backdrop-blur-md shadow-lg hover:bg-opacity-15 duration-300 mx-auto">
               <h1 className="cursor-pointer text-white font-semibold  text-sm sm:text-base">
                 Start Learning
               </h1>
               <span className="text-white bg-orange-600 rounded-full p-1 mr-1">
                 <ArrowRight size={18} />
               </span>
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
         </header>
 
         {/* Feature Block */}
@@ -500,10 +495,9 @@ const LandingPage = () => {
             <div className="space-y-4">
               {accordionItems.map((item, index) => (
                 <div key={index} className=" bg-gray-100  pb-2">
-                  <motion.button
+                  <button
                     onClick={() => toggleAccordion(index)}
                     className="w-full flex justify-between items-center text-left p-4 "
-                    whileTap={{ scale: 0.99 }}
                   >
                     <span className="font-semibold text-gray-800">
                       {item.title}
@@ -516,7 +510,7 @@ const LandingPage = () => {
                     >
                       <ChevronDown />
                     </motion.div>
-                  </motion.button>
+                  </button>
                   <AnimatePresence>
                     {activeAccordion === index && (
                       <motion.div
