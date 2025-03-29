@@ -2,20 +2,25 @@ const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/authMiddleware");
 const courseController = require("../controllers/coursesControllers");
+const mediaController = require("../controllers/mediaController");
 
 // POST /courses - Create a new course (Instructors only)
-router.post(
-  "/createCourse",
-  protect,
-
-  courseController.createCourse
-);
+router.post("/createCourse", protect, courseController.createCourse);
 
 // GET /courses - Get all courses
 router.get("/fetchCourses", courseController.getCourses);
 
 // GET /courses/instructor - Get all courses for the authenticated instructor
 router.get("/instructorCourses", courseController.getInstructorCourses);
+
+// GET /courses/:id - Get a specific course by ID
+router.get("/course/:id", courseController.getCourseById);
+
+// POST /courses/:id/videos - Add a video to a course
+router.post("/course/:id/videos", protect, courseController.addCourseVideo);
+
+// GET /courses/:id/videos - Get all videos for a specific course
+router.get("/course/:id/videos", courseController.getCourseVideos);
 
 // PUT /courses/:id - Update course information (Instructors only)
 router.put("/updateCourse/:id", protect, courseController.updateCourse);

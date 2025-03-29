@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import DashboardLayout from "./DashboardLayout"; // Adjust path as needed
 import {
   CirclePlus,
@@ -93,6 +94,7 @@ const DeleteConfirmationModal = ({
 };
 
 const InstructorCourses = () => {
+  const navigate = useNavigate(); // Initialize the navigate function
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -154,6 +156,11 @@ const InstructorCourses = () => {
     setSearchTerm(e.target.value);
   };
 
+  // Navigate to course details page
+  const navigateToCourseDetails = (courseId) => {
+    navigate(`/instructor/courses/${courseId}`);
+  };
+
   // Toggle dropdown menu
   const toggleMenu = (e, courseId) => {
     e.stopPropagation(); // Prevent document click from immediately closing the menu
@@ -203,7 +210,10 @@ const InstructorCourses = () => {
 
   // Render a course card
   const CourseCard = ({ course }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden border w-72 border-gray-200 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      onClick={() => navigateToCourseDetails(course._id)}
+    >
       <div className="h-40 bg-gray-200 relative">
         {course.thumbnail ? (
           <img
@@ -271,7 +281,14 @@ const InstructorCourses = () => {
         {/* Price and publish button section */}
         <div className="mt-auto flex justify-between items-center">
           <div className="font-bold text-lg">₹{course.price}</div>
-          <button className="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2 font-semibold rounded-md text-sm">
+          <button
+            className="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2 font-semibold rounded-md text-sm"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent navigation when clicking on the button
+              // Add your publish logic here
+              console.log("Publish course:", course._id);
+            }}
+          >
             Publish
           </button>
         </div>

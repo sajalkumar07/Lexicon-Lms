@@ -9,6 +9,7 @@ import Dashboard from "./assets/Instructor/Components/InstructorDashboard/Dashbo
 import Help from "./assets/Instructor/Components/InstructorDashboard/Helps";
 import InstructorLogin from "./assets/Instructor/Components/Auth/Login";
 import InstructorSignin from "./assets/Instructor/Components/Auth/Signup";
+import CourseDetailsPage from "./assets/Instructor/DashboardComponents/CourseDetailsPage";
 
 function App() {
   return (
@@ -19,6 +20,10 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/get-courses" element={<Courses />} />
         <Route path="/instructor/courses" element={<InstructorCourses />} />
+        <Route
+          path="/instructor/courses/:courseId"
+          element={<CourseDetailsPage />}
+        />
         <Route path="/communication" element={<Communication />} />
         <Route path="/instructor-dashboard" element={<Dashboard />} />
         <Route path="/help" element={<Help />} />

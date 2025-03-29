@@ -15,16 +15,38 @@ const courseSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    description: { type: String, required: true },
+    description: {
+      type: String,
+      required: true,
+    },
     difficulty: {
       type: String,
       enum: ["Beginner", "Intermediate", "Advance"],
       required: true,
     },
     instructor: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Instructor",
+      required: true,
     },
-    thumbnail: { type: String },
+    courseThumbnail: {
+      type: String,
+      required: true,
+    },
+    videos: [
+      {
+        title: { type: String, required: true },
+        description: { type: String },
+        videoUrl: { type: String, required: true },
+        videoThumbnail: { type: String, required: true },
+        duration: { type: Number },
+        order: { type: Number, required: true },
+      },
+    ],
+    totalDuration: { type: Number, default: 0 },
+    totalVideos: { type: Number, default: 0 },
+    rating: { type: Number, default: 0 },
+    students: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
