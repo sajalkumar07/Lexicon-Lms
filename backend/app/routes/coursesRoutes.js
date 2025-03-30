@@ -27,6 +27,18 @@ router.put("/updateCourse/:id", protect, courseController.updateCourse);
 // DELETE /courses/:id - Delete a course (Instructors or Admin only)
 router.delete("/deleteCourse/:id", protect, courseController.deleteCourse);
 
+router.delete(
+  "/deleteCourse/:courseId/videos/:videoId",
+  protect,
+  courseController.deleteCourseVideo
+);
+
+router.put(
+  "/updateCourse/:courseId/videos/:videoId",
+  protect,
+  courseController.updateCourseVideo
+);
+
 // GET /courses/test-auth - Test authentication
 router.get("/test-auth", protect, courseController.testAuth);
 

@@ -394,6 +394,171 @@ exports.getCourseVideos = async (req, res) => {
   }
 };
 
+exports.updateCourseVideo = async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const videoId = req.params.videoId;
+    const { title, description, videoUrl, videoThumbnail, duration } = req.body;
+
+    // Find the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Verify the instructor is the course owner
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ message: "Authorization header missing or invalid" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (course.instructor.toString() !== decoded.id) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to modify this course" });
+    }
+
+    // Find the video in the array
+    const videoIndex = course.videos.findIndex(
+      (video) => video._id.toString() === videoId
+    );
+
+    if (videoIndex === -1) {
+      return res
+        .status(404)
+        .json({ message: "Video not found in this course" });
+    }
+
+    // Store old duration for calculation
+    const oldDuration = course.videos[videoIndex].duration || 0;
+
+    // Update video fields if provided
+    if (title) course.videos[videoIndex].title = title;
+    if (description !== undefined)
+      course.videos[videoIndex].description = description;
+    if (videoUrl) course.videos[videoIndex].videoUrl = videoUrl;
+    if (videoThumbnail)
+      course.videos[videoIndex].videoThumbnail = videoThumbnail;
+
+    // Update duration if provided
+    if (duration !== undefined) {
+      // Update total course duration
+      course.totalDuration =
+        course.totalDuration - oldDuration + (duration || 0);
+      course.videos[videoIndex].duration = duration || 0;
+    }
+
+    await course.save();
+
+    res.status(200).json({
+      message: "Video updated successfully",
+      courseId: course._id,
+      video: course.videos[videoIndex],
+    });
+  } catch (error) {
+    console.error("Error updating video in course:", error);
+
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(401).json({ message: "Authentication error" });
+    }
+
+    res.status(500).json({
+      message: "Error updating video in course",
+      error: error.message,
+    });
+  }
+};
+
+exports.deleteCourseVideo = async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const videoId = req.params.videoId;
+
+    // Find the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Verify the instructor is the course owner
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ message: "Authorization header missing or invalid" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (
+      course.instructor.toString() !== decoded.id &&
+      decoded.role !== "admin"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to modify this course" });
+    }
+
+    // Find the video index in the array
+    const videoIndex = course.videos.findIndex(
+      (video) => video._id.toString() === videoId
+    );
+
+    if (videoIndex === -1) {
+      return res
+        .status(404)
+        .json({ message: "Video not found in this course" });
+    }
+
+    // Store video duration before removing
+    const removedVideoDuration = course.videos[videoIndex].duration || 0;
+
+    // Remove the video
+    course.videos.splice(videoIndex, 1);
+
+    // Update total duration and video count
+    course.totalDuration -= removedVideoDuration;
+    course.totalVideos = course.videos.length;
+
+    // Reorder remaining videos if needed
+    course.videos.forEach((video, index) => {
+      video.order = index + 1;
+    });
+
+    await course.save();
+
+    res.status(200).json({
+      message: "Video deleted successfully",
+      courseId: course._id,
+      totalVideos: course.totalVideos,
+      totalDuration: course.totalDuration,
+    });
+  } catch (error) {
+    console.error("Error deleting video from course:", error);
+
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(401).json({ message: "Authentication error" });
+    }
+
+    res.status(500).json({
+      message: "Error deleting video from course",
+      error: error.message,
+    });
+  }
+};
+
 // Test auth endpoint
 exports.testAuth = async (req, res) => {
   try {

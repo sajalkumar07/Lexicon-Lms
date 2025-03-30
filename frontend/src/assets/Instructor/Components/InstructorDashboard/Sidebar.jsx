@@ -5,7 +5,6 @@ import {
   BookOpen,
   MessageSquare,
   BarChart,
-  HelpCircle,
   ChevronRight,
   ChevronLeft,
   Settings,
@@ -348,7 +347,7 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
               <Link to="/instructor-dashboard" onClick={handleNavigation}>
                 <div
                   className={`flex items-center gap-4 p-2 transition-all duration-200 hover:bg-white/10 hover:border-l-[#2ad8ff] ${
-                    location.pathname === "/Dashboard"
+                    location.pathname === "/instructor-dashboard"
                       ? "border-l-4 border-[#2ad8ff]"
                       : "border-l-4 border-transparent"
                   }`}
@@ -423,34 +422,6 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
                       }`}
                     >
                       <span className="whitespace-nowrap">Communication</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-            {/* Help */}
-            <div className="mb-6">
-              <Link to="/help" onClick={handleNavigation}>
-                <div
-                  className={`flex items-center gap-4 p-2 transition-all duration-200 hover:bg-white/10 hover:border-l-[#2ad8ff] ${
-                    location.pathname === "/help"
-                      ? "border-l-4 border-[#2ad8ff]"
-                      : "border-l-4 border-transparent"
-                  }`}
-                >
-                  <div className="flex justify-center items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <HelpCircle size={20} className="text-white" />
-                    </div>
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isExpanded || (isMobile && showMobileSidebar)
-                          ? "w-auto opacity-100"
-                          : "w-0 opacity-0"
-                      }`}
-                    >
-                      <span className="whitespace-nowrap">Help</span>
                     </div>
                   </div>
                 </div>

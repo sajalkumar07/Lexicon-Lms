@@ -8,7 +8,7 @@ import {
   Plus,
   X,
   Clock,
-  FileText,
+  Play,
   MoreVertical,
   Pencil,
   Trash2,
@@ -22,6 +22,7 @@ import {
   updateVideoLecture,
 } from "../Services/CourseManagement";
 import DashboardLayout from "../Components/InstructorDashboard/DashboardLayout";
+import { Link } from "react-router-dom";
 
 // Format seconds to hours:minutes:seconds
 const formatDuration = (seconds) => {
@@ -535,7 +536,7 @@ const CourseDetailsPage = () => {
     <DashboardLayout>
       {/* Course Header */}
       <header className="bg-white border-b shadow-md">
-        <div className="max-w-6xl mx-auto px-4 py-4">
+        <div className="w-full mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="mb-4 md:mb-0">
               <h1 className="text-xl font-medium text-gray-900">
@@ -549,10 +550,10 @@ const CourseDetailsPage = () => {
             <div className="flex items-center space-x-3">
               <span className="text-gray-900 font-medium">₹{course.price}</span>
               <button
-                className="bg-gray-900 text-white px-3 py-1 rounded text-sm  transition-colors"
+                className="bg-gray-900 text-white p-2 rounded text-sm  transition-colors flex justify-center items-center"
                 onClick={openAddVideoModal}
               >
-                <Plus size={16} className="inline mr-1" />
+                <Plus size={20} className="inline mr-1" />
                 Add Video
               </button>
             </div>
@@ -579,10 +580,10 @@ const CourseDetailsPage = () => {
       )}
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6 ">
+      <div className=" mx-auto px-4 py-6  w-full ">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-4  rounded-md ">
           {/* Course Details */}
-          <div className="lg:col-span-1 shadow-md">
+          <div className="lg:col-span-1 shadow-md ">
             <div className=" p-4 rounded ">
               <h2 className="text-lg font-medium mb-4 text-gray-900">
                 Course details
@@ -592,7 +593,7 @@ const CourseDetailsPage = () => {
                 <img
                   src={course.courseThumbnail}
                   alt={course.title}
-                  className="w-full h-40 object-cover mb-4 rounded"
+                  className="w-full h-full object-cover mb-4 rounded"
                 />
               ) : (
                 <div className="w-full h-40 bg-gray-50 rounded flex items-center justify-center mb-4">
@@ -635,10 +636,10 @@ const CourseDetailsPage = () => {
                   Video Lectures
                 </h2>
                 <button
-                  className="bg-gray-900 text-white px-3 py-1 rounded text-sm transition-colors"
+                  className="bg-gray-900 text-white p-2 rounded text-sm  transition-colors flex justify-center items-center"
                   onClick={openAddVideoModal}
                 >
-                  <Plus size={16} className="inline mr-1" />
+                  <Plus size={20} className="inline mr-1" />
                   Add Video
                 </button>
               </div>
@@ -675,7 +676,7 @@ const CourseDetailsPage = () => {
                               <img
                                 src={video.videoThumbnail}
                                 alt={video.title}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover rounded-md"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -685,21 +686,25 @@ const CourseDetailsPage = () => {
                           </div>
 
                           {/* Video Information */}
+
                           <div className="p-3 flex-grow flex flex-col">
                             <div className="flex justify-between items-start">
-                              <div>
-                                <div className="flex items-center">
-                                  <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full mr-2">
-                                    {index + 1}
-                                  </span>
-                                  <h3 className="text-base font-medium text-gray-900">
-                                    {video.title}
-                                  </h3>
+                              <Link to={`/courses/${courseId}/player`}>
+                                {" "}
+                                <div>
+                                  <div className="flex items-center">
+                                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full mr-2">
+                                      {index + 1}
+                                    </span>
+                                    <h3 className="text-base font-medium text-gray-900">
+                                      {video.title}
+                                    </h3>
+                                  </div>
+                                  <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+                                    {video.description}
+                                  </p>
                                 </div>
-                                <p className="text-gray-500 text-sm mt-1 line-clamp-2">
-                                  {video.description}
-                                </p>
-                              </div>
+                              </Link>
 
                               {/* Menu Button */}
                               <div className="relative ml-2">
@@ -742,15 +747,16 @@ const CourseDetailsPage = () => {
                                 <span>{formatDuration(video.duration)}</span>
                               </div>
 
-                              <a
-                                href={video.videoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-700 flex items-center"
+                              <Link
+                                to={`/courses/${courseId}/player`}
+                                className="your-button-styles"
                               >
-                                <FileText size={12} className="mr-1" />
-                                View
-                              </a>
+                                <div className="flex justify-center items-center ">
+                                  {" "}
+                                  <Play size={12} className="mr-1 " />
+                                  <button>Play</button>
+                                </div>
+                              </Link>
                             </div>
                           </div>
                         </div>

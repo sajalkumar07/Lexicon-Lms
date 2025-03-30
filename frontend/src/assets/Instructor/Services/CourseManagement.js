@@ -89,7 +89,7 @@ export const deleteVideoLecture = async (courseId, videoId) => {
     const token = localStorage.getItem("authToken") || "";
 
     const response = await fetch(
-      `${config.apiUrl}/api/courses/course/${courseId}/videos/${videoId}`,
+      `${config.apiUrl}/api/courses/deleteCourse/${courseId}/videos/${videoId}`,
       {
         method: "DELETE",
         headers: {
@@ -228,7 +228,7 @@ export const updateVideoLecture = async (courseId, videoId, videoData) => {
     const token = localStorage.getItem("authToken") || "";
 
     const response = await fetch(
-      `${config.apiUrl}/api/courses/course/${courseId}/videos/${videoId}`,
+      `${config.apiUrl}/api/courses/updateCourse/${courseId}/videos/${videoId}`,
       {
         method: "PUT",
         headers: {

@@ -6,10 +6,10 @@ import Courses from "./assets/Candidate/Components/Courses/getCourses";
 import InstructorCourses from "./assets/Instructor/Components/InstructorDashboard/InstructorCourses";
 import Communication from "./assets/Instructor/Components/InstructorDashboard/Communication";
 import Dashboard from "./assets/Instructor/Components/InstructorDashboard/Dashboard";
-import Help from "./assets/Instructor/Components/InstructorDashboard/Helps";
 import InstructorLogin from "./assets/Instructor/Components/Auth/Login";
 import InstructorSignin from "./assets/Instructor/Components/Auth/Signup";
 import CourseDetailsPage from "./assets/Instructor/DashboardComponents/CourseDetailsPage";
+import CustomVideoPlayer from "./assets/Instructor/DashboardComponents/CustomVideoPlayer";
 
 function App() {
   return (
@@ -26,9 +26,12 @@ function App() {
         />
         <Route path="/communication" element={<Communication />} />
         <Route path="/instructor-dashboard" element={<Dashboard />} />
-        <Route path="/help" element={<Help />} />
         <Route path="/login-instructor" element={<InstructorLogin />} />
         <Route path="/signup-instructor" element={<InstructorSignin />} />
+        <Route
+          path="/courses/:courseId/player"
+          element={<CustomVideoPlayer />}
+        />
       </Routes>
     </Router>
   );

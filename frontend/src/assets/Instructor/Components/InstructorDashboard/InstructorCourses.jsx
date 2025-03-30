@@ -193,45 +193,41 @@ const InstructorCourses = () => {
 
   const CourseCard = ({ course }) => (
     <div
-      className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-sm transition-shadow cursor-pointer flex flex-col h-full"
       onClick={() => navigateToCourseDetails(course._id)}
     >
-      <div className="bg-gray-100 relative">
+      <div className="aspect-video p-4 h-64  relative">
         {course.courseThumbnail ? (
           <img
             src={course.courseThumbnail}
             alt={course.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-md"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <BookOpen size={32} className="text-gray-400" />
+          <div className="w-full h-full flex items-center justify-center bg-gray-50">
+            <BookOpen size={24} className="text-gray-400" />
           </div>
         )}
-        <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-          {course.difficulty}
-        </div>
-        <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+        <div className="absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded">
           {course.difficulty}
         </div>
       </div>
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex flex-col">
-            {" "}
-            <h3 className="text-md font-medium text-gray-900 line-clamp-1">
+
+      <div className="p-4 flex flex-col flex-grow">
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-md font-medium text-gray-900 truncate">
               {course.title}
             </h3>
-            <h3 className="text-md font-medium text-gray-400 line-clamp-1">
-              {course.category}
-            </h3>
+            <p className="text-xs text-gray-500 truncate">{course.category}</p>
           </div>
+
           <div className="relative">
             <button
-              className="p-1 hover:bg-gray-100 rounded"
+              className="p-1 text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
               onClick={(e) => toggleMenu(e, course._id)}
             >
-              <MoreVertical size={16} className="text-gray-600" />
+              <MoreVertical size={16} />
             </button>
 
             {openMenuId === course._id && (
@@ -255,14 +251,16 @@ const InstructorCourses = () => {
           </div>
         </div>
 
-        <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+        <p className="text-sm text-gray-500 mb-4 line-clamp-2 flex-grow">
           {course.description || "No description available."}
         </p>
 
         <div className="flex justify-between items-center">
-          <span className="font-medium">₹{course.price}</span>
+          <span className="text-sm font-medium text-gray-900">
+            ₹{course.price}
+          </span>
           <button
-            className="text-sm bg-gray-900 hover:bg-gray-800 text-white px-3 py-1 rounded"
+            className="text-xs px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               console.log("Publish course:", course._id);
@@ -277,11 +275,11 @@ const InstructorCourses = () => {
 
   const CourseListItem = ({ course }) => (
     <div
-      className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer mb-3"
+      className="bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow cursor-pointer mb-3"
       onClick={() => navigateToCourseDetails(course._id)}
     >
       <div className="flex flex-col sm:flex-row">
-        <div className="sm:w-48 h-40 bg-gray-100 relative">
+        <div className="sm:w-48 h-40 bg-gray-100 relative flex-shrink-0">
           {course.courseThumbnail ? (
             <img
               src={course.courseThumbnail}
@@ -289,29 +287,32 @@ const InstructorCourses = () => {
               className="w-full h-full object-cover rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <BookOpen size={32} className="text-gray-400" />
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <BookOpen size={24} className="text-gray-400" />
             </div>
           )}
-          <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded">
             {course.difficulty}
           </div>
         </div>
 
         <div className="p-4 flex-grow flex flex-col">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <h3 className="text-md font-medium text-gray-900">
+          <div className="flex justify-between items-start gap-2 mb-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-md font-medium text-gray-900 truncate">
                 {course.title}
               </h3>
-              <p className="text-sm text-gray-500">{course.category}</p>
+              <p className="text-xs text-gray-500 truncate">
+                {course.category}
+              </p>
             </div>
+
             <div className="relative">
               <button
-                className="p-1 hover:bg-gray-100 rounded"
+                className="p-1 text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
                 onClick={(e) => toggleMenu(e, course._id)}
               >
-                <MoreVertical size={16} className="text-gray-600" />
+                <MoreVertical size={16} />
               </button>
 
               {openMenuId === course._id && (
@@ -340,9 +341,11 @@ const InstructorCourses = () => {
           </p>
 
           <div className="mt-auto flex justify-between items-center">
-            <span className="font-medium">₹{course.price}</span>
+            <span className="text-sm font-medium text-gray-900">
+              ₹{course.price}
+            </span>
             <button
-              className="text-sm bg-gray-900 hover:bg-gray-800 text-white px-3 py-1 rounded"
+              className="text-xs px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 console.log("Publish course:", course._id);
@@ -358,9 +361,16 @@ const InstructorCourses = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto ">
+      <div className="max-w-7xl mx-auto p-1 ">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <h1 className="text-xl font-medium text-gray-900">Your Courses</h1>
+          <div className="mb-6">
+            <h1 className="text-2xl font-medium text-gray-900 mb-1">
+              Your Courses
+            </h1>
+            <p className="text-gray-500">
+              View, edit, and manage all your courses in one place.
+            </p>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative">
@@ -377,7 +387,7 @@ const InstructorCourses = () => {
               />
             </div>
 
-            <div className="flex border border-gray-200 rounded-md overflow-hidden text-white">
+            <div className="flex rounded-md overflow-hidden text-white">
               <button
                 className={`p-2 ${
                   viewType === "grid" ? "bg-gray-900" : "text-black "
