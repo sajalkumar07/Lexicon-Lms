@@ -1,21 +1,19 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import DashboardLayout from "./DashboardLayout";
 import {
-  CirclePlus,
+  BookOpen,
   MoreVertical,
   Pencil,
   Trash2,
-  AlertTriangle,
   X,
-  BookOpen,
-  GridIcon,
-  ListIcon,
+  Plus,
+  Search,
+  Grid2x2,
+  List,
 } from "lucide-react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import Loader from "../../../Utils/Loader";
 import {
   fetchAllInstructorCourses,
@@ -23,7 +21,6 @@ import {
 } from "../../Services/CourseManagement";
 import CreateCoursePopup from "../../DashboardComponents/createCoursePopup";
 
-// Delete Confirmation Modal Component remains the same
 const DeleteConfirmationModal = ({
   isOpen,
   onClose,
@@ -34,32 +31,25 @@ const DeleteConfirmationModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
-        className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4 animate-fadeIn"
+        className="bg-white rounded-lg shadow-md p-6 max-w-md w-full mx-4 animate-fadeIn"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center">
-            <div className="bg-red-100 p-2 rounded-full mr-3">
-              <AlertTriangle size={24} className="text-red-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900">
-              Delete Course
-            </h3>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Delete Course</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         <div className="mb-6">
           <p className="text-gray-700 mb-2">
             Are you sure you want to delete{" "}
-            <span className="font-semibold">{courseName}</span>?
+            <span className="font-medium">{courseName}</span>?
           </p>
           <p className="text-sm text-gray-500">
             This action cannot be undone. All data associated with this course
@@ -70,19 +60,19 @@ const DeleteConfirmationModal = ({
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+            className="px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50"
             disabled={isDeleting}
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md font-medium transition-colors flex items-center"
+            className="px-4 py-2 text-white bg-red-500 rounded-md text-sm font-medium hover:bg-red-600"
             disabled={isDeleting}
           >
             {isDeleting ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>
                 Deleting...
               </>
             ) : (
@@ -96,7 +86,6 @@ const DeleteConfirmationModal = ({
 };
 
 const InstructorCourses = () => {
-  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -106,19 +95,14 @@ const InstructorCourses = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
-  // Add state for view type (grid or list)
   const [viewType, setViewType] = useState("grid");
-
-  // Delete confirmation modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState(null);
 
-  // Fetch courses on component mount
   useEffect(() => {
     loadCourses();
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
       setOpenMenuId(null);
@@ -144,7 +128,6 @@ const InstructorCourses = () => {
     }
   };
 
-  // Handle search functionality
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setFilteredCourses(courses);
@@ -160,23 +143,19 @@ const InstructorCourses = () => {
     setSearchTerm(e.target.value);
   };
 
-  // Toggle view type between grid and list
   const toggleViewType = () => {
     setViewType(viewType === "grid" ? "list" : "grid");
   };
 
-  // Navigate to course details page
   const navigateToCourseDetails = (courseId) => {
     window.open(`/instructor/courses/${courseId}`, "_blank");
   };
 
-  // Toggle dropdown menu
   const toggleMenu = (e, courseId) => {
     e.stopPropagation();
     setOpenMenuId(openMenuId === courseId ? null : courseId);
   };
 
-  // Open delete confirmation modal
   const openDeleteModal = (e, course) => {
     e.stopPropagation();
     setOpenMenuId(null);
@@ -184,7 +163,6 @@ const InstructorCourses = () => {
     setDeleteModalOpen(true);
   };
 
-  // Handle course deletion
   const confirmDeleteCourse = async () => {
     if (!courseToDelete) return;
 
@@ -192,13 +170,11 @@ const InstructorCourses = () => {
       setIsDeleting(true);
       await deleteCourse(courseToDelete._id);
 
-      // After successful deletion, refresh the course list
       setCourses(courses.filter((course) => course._id !== courseToDelete._id));
       setFilteredCourses(
         filteredCourses.filter((course) => course._id !== courseToDelete._id)
       );
 
-      // Close modal and reset state
       setDeleteModalOpen(false);
       setCourseToDelete(null);
     } catch (err) {
@@ -209,20 +185,18 @@ const InstructorCourses = () => {
     }
   };
 
-  // Handle edit course
   const handleEditCourse = (e, courseId) => {
     e.stopPropagation();
     setOpenMenuId(null);
     console.log("Edit course:", courseId);
   };
 
-  // Render a course card for grid view
   const CourseCard = ({ course }) => (
     <div
-      className="bg-white rounded-lg shadow-md overflow-hidden border  border-gray-200 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
       onClick={() => navigateToCourseDetails(course._id)}
     >
-      <div className="h-40 bg-gray-200 relative">
+      <div className="bg-gray-100 relative">
         {course.courseThumbnail ? (
           <img
             src={course.courseThumbnail}
@@ -230,67 +204,65 @@ const InstructorCourses = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <BookOpen size={40} className="text-gray-400" />
-            <div className="absolute top-0 right-0 bg-blue-500 rounded-bl text-white font-semibold text-xs px-2 py-1">
-              {course.difficulty}
-            </div>
+          <div className="w-full h-full flex items-center justify-center">
+            <BookOpen size={32} className="text-gray-400" />
           </div>
         )}
+        <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+          {course.difficulty}
+        </div>
+        <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+          {course.difficulty}
+        </div>
       </div>
-      <div className="p-4 flex-grow flex flex-col">
-        {/* Course title with more menu */}
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="text-lg font-medium text-gray-900">{course.title}</h3>
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <div className="flex flex-col">
+            {" "}
+            <h3 className="text-md font-medium text-gray-900 line-clamp-1">
+              {course.title}
+            </h3>
+            <h3 className="text-md font-medium text-gray-400 line-clamp-1">
+              {course.category}
+            </h3>
+          </div>
           <div className="relative">
             <button
-              className="p-1 hover:bg-gray-100 rounded-full"
+              className="p-1 hover:bg-gray-100 rounded"
               onClick={(e) => toggleMenu(e, course._id)}
             >
-              <MoreVertical size={18} className="text-gray-600" />
+              <MoreVertical size={16} className="text-gray-600" />
             </button>
 
-            {/* Dropdown menu */}
             {openMenuId === course._id && (
-              <div className="absolute right-0 mt-1 w-36 bg-white shadow-lg rounded-md z-10 border border-gray-200">
-                <ul className="py-1">
-                  <li>
-                    <button
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                      onClick={(e) => handleEditCourse(e, course._id)}
-                    >
-                      <Pencil size={16} className="mr-2" />
-                      Edit
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
-                      onClick={(e) => openDeleteModal(e, course)}
-                    >
-                      <Trash2 size={16} className="mr-2" />
-                      Delete
-                    </button>
-                  </li>
-                </ul>
+              <div className="absolute right-0 mt-1 w-32 bg-white shadow-md rounded-md z-10 border border-gray-100 text-sm">
+                <button
+                  className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center"
+                  onClick={(e) => handleEditCourse(e, course._id)}
+                >
+                  <Pencil size={14} className="mr-2" />
+                  Edit
+                </button>
+                <button
+                  className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-50 flex items-center"
+                  onClick={(e) => openDeleteModal(e, course)}
+                >
+                  <Trash2 size={14} className="mr-2" />
+                  Delete
+                </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Course category */}
-        <p className="text-sm text-gray-600 mb-2">{course.category}</p>
-
-        {/* Course description */}
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-gray-500 mb-3 line-clamp-2">
           {course.description || "No description available."}
         </p>
 
-        {/* Price and publish button section */}
-        <div className="mt-auto flex justify-between items-center">
-          <div className="font-bold text-lg">₹{course.price}</div>
+        <div className="flex justify-between items-center">
+          <span className="font-medium">₹{course.price}</span>
           <button
-            className="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2 font-semibold rounded-md text-sm"
+            className="text-sm bg-gray-900 hover:bg-gray-800 text-white px-3 py-1 rounded"
             onClick={(e) => {
               e.stopPropagation();
               console.log("Publish course:", course._id);
@@ -303,15 +275,13 @@ const InstructorCourses = () => {
     </div>
   );
 
-  // Render a course row for list view
   const CourseListItem = ({ course }) => (
     <div
-      className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer w-full mb-3"
+      className="bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer mb-3"
       onClick={() => navigateToCourseDetails(course._id)}
     >
       <div className="flex flex-col sm:flex-row">
-        {/* Course thumbnail / icon */}
-        <div className="sm:w-48 h-40 sm:h-full bg-gray-200 relative">
+        <div className="sm:w-48 h-40 bg-gray-100 relative">
           {course.courseThumbnail ? (
             <img
               src={course.courseThumbnail}
@@ -319,72 +289,60 @@ const InstructorCourses = () => {
               className="w-full h-full object-cover rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none">
-              <BookOpen size={40} className="text-gray-400" />
-              <div className="absolute top-0 right-0 bg-blue-500 rounded-bl text-white font-semibold text-xs px-2 py-1">
-                {course.difficulty}
-              </div>
+            <div className="w-full h-full flex items-center justify-center">
+              <BookOpen size={32} className="text-gray-400" />
             </div>
           )}
+          <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+            {course.difficulty}
+          </div>
         </div>
 
-        {/* Course details */}
-        <div className="p-4 flex-grow flex flex-col justify-between w-full">
-          <div>
-            <div className="flex justify-between items-start mb-1">
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  {course.title}
-                </h3>
-                <p className="text-sm text-gray-600">{course.category}</p>
-              </div>
-              <div className="relative">
-                <button
-                  className="p-1 hover:bg-gray-100 rounded-full"
-                  onClick={(e) => toggleMenu(e, course._id)}
-                >
-                  <MoreVertical size={18} className="text-gray-600" />
-                </button>
-
-                {/* Dropdown menu */}
-                {openMenuId === course._id && (
-                  <div className="absolute right-0 mt-1 w-36 bg-white shadow-lg rounded-md z-10 border border-gray-200">
-                    <ul className="py-1">
-                      <li>
-                        <button
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          onClick={(e) => handleEditCourse(e, course._id)}
-                        >
-                          <Pencil size={16} className="mr-2" />
-                          Edit
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
-                          onClick={(e) => openDeleteModal(e, course)}
-                        >
-                          <Trash2 size={16} className="mr-2" />
-                          Delete
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
+        <div className="p-4 flex-grow flex flex-col">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h3 className="text-md font-medium text-gray-900">
+                {course.title}
+              </h3>
+              <p className="text-sm text-gray-500">{course.category}</p>
             </div>
+            <div className="relative">
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={(e) => toggleMenu(e, course._id)}
+              >
+                <MoreVertical size={16} className="text-gray-600" />
+              </button>
 
-            {/* Course description */}
-            <p className="text-sm text-gray-500 my-2">
-              {course.description || "No description available."}
-            </p>
+              {openMenuId === course._id && (
+                <div className="absolute right-0 mt-1 w-32 bg-white shadow-md rounded-md z-10 border border-gray-100 text-sm">
+                  <button
+                    className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center"
+                    onClick={(e) => handleEditCourse(e, course._id)}
+                  >
+                    <Pencil size={14} className="mr-2" />
+                    Edit
+                  </button>
+                  <button
+                    className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-50 flex items-center"
+                    onClick={(e) => openDeleteModal(e, course)}
+                  >
+                    <Trash2 size={14} className="mr-2" />
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Price and publish button */}
-          <div className="flex justify-between items-center mt-2">
-            <div className="font-bold text-lg">₹{course.price}</div>
+          <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+            {course.description || "No description available."}
+          </p>
+
+          <div className="mt-auto flex justify-between items-center">
+            <span className="font-medium">₹{course.price}</span>
             <button
-              className="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2 font-semibold rounded-md text-sm"
+              className="text-sm bg-gray-900 hover:bg-gray-800 text-white px-3 py-1 rounded"
               onClick={(e) => {
                 e.stopPropagation();
                 console.log("Publish course:", course._id);
@@ -400,66 +358,59 @@ const InstructorCourses = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
-          <h1 className="text-2xl font-bold">Your Courses</h1>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
-            <div className="flex justify-center items-center">
-              <div className="relative w-full max-w-xl flex justify-between items-center">
-                <input
-                  placeholder="Search your courses"
-                  className="w-64 border border-gray-600 p-2 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-900"
-                  aria-label="Search courses"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-                <div className="p-2 cursor-pointer right-1 absolute transform-y-1/2 text-gray-600">
-                  <FontAwesomeIcon icon={faMagnifyingGlass} />
-                </div>
-              </div>
+      <div className="max-w-7xl mx-auto ">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+          <h1 className="text-xl font-medium text-gray-900">Your Courses</h1>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search courses..."
+                className="pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-900"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              />
             </div>
 
-            {/* View toggle */}
-            <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+            <div className="flex border border-gray-200 rounded-md overflow-hidden text-white">
               <button
                 className={`p-2 ${
-                  viewType === "grid"
-                    ? "bg-gray-900 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                  viewType === "grid" ? "bg-gray-900" : "text-black "
                 }`}
                 onClick={() => setViewType("grid")}
-                aria-label="Grid view"
               >
-                <GridIcon size={18} />
+                <Grid2x2 size={16} />
               </button>
               <button
                 className={`p-2 ${
-                  viewType === "list"
-                    ? "bg-gray-900 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                  viewType === "list" ? "bg-gray-900" : "text-black"
                 }`}
                 onClick={() => setViewType("list")}
-                aria-label="List view"
               >
-                <ListIcon size={18} />
+                <List size={16} />
               </button>
             </div>
 
             <button
-              className="flex justify-center items-center gap-2 text-white rounded-md bg-gray-900 p-2 hover:shadow-xl hover:bg-gray-800 duration-300"
+              className="flex justify-center items-center p-2 bg-gray-900  text-white rounded-md text-sm"
               onClick={() => setIsModalOpen(true)}
             >
-              <CirclePlus size={18} />
+              <Plus size={16} className="mr-2" />
               Create Course
             </button>
           </div>
         </div>
 
         {deleteError && (
-          <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mt-6">
-            <p>Error: {deleteError}</p>
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 text-sm">
+            <p>{deleteError}</p>
             <button
-              className="mt-2 text-red-600 hover:text-red-800 underline"
+              className="text-red-600 hover:text-red-800 underline text-xs mt-1"
               onClick={() => setDeleteError(null)}
             >
               Dismiss
@@ -472,58 +423,51 @@ const InstructorCourses = () => {
             <Loader />
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mt-6">
-            <p>Error: {error}</p>
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+            <p>{error}</p>
             <button
-              className="mt-2 text-red-600 hover:text-red-800 underline"
+              className="text-red-600 hover:text-red-800 underline text-sm mt-2"
               onClick={() => window.location.reload()}
             >
               Try again
             </button>
           </div>
         ) : filteredCourses.length === 0 ? (
-          <div className="bg-gray-50 border-2 mt-10 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <BookOpen size={28} className="text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
+          <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
+            <BookOpen size={32} className="text-gray-400 mx-auto mb-3" />
+            <h3 className="text-base font-medium text-gray-900 mb-1">
               {searchTerm ? "No courses found" : "No courses yet"}
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 text-sm mb-4">
               {searchTerm
-                ? "Try adjusting your search criteria"
+                ? "Try adjusting your search"
                 : "Create your first course to get started"}
             </p>
             {!searchTerm && (
               <button
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md hover:shadow-xl duration-300 text-white bg-gray-900 hover:bg-gray-800"
+                className="text-sm px-3 py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
                 onClick={() => setIsModalOpen(true)}
               >
-                <CirclePlus size={16} className="mr-2" />
+                <Plus size={16} className="inline mr-1" />
                 Create your first course
               </button>
             )}
           </div>
+        ) : viewType === "grid" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCourses.map((course) => (
+              <CourseCard key={course._id} course={course} />
+            ))}
+          </div>
         ) : (
-          <>
-            {viewType === "grid" ? (
-              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCourses.map((course) => (
-                  <CourseCard key={course._id} course={course} />
-                ))}
-              </div>
-            ) : (
-              <div className="mt-8">
-                {filteredCourses.map((course) => (
-                  <CourseListItem key={course._id} course={course} />
-                ))}
-              </div>
-            )}
-          </>
+          <div>
+            {filteredCourses.map((course) => (
+              <CourseListItem key={course._id} course={course} />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Custom Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={deleteModalOpen}
         onClose={() => {
@@ -539,7 +483,7 @@ const InstructorCourses = () => {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          loadCourses(); // Refresh courses after creating a new one
+          loadCourses();
         }}
       />
     </DashboardLayout>

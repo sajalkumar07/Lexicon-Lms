@@ -7,10 +7,8 @@ import {
   Video,
   Plus,
   X,
-  Upload,
   Clock,
   FileText,
-  AlertTriangle,
   MoreVertical,
   Pencil,
   Trash2,
@@ -116,25 +114,20 @@ const AddVideoModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
-        className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full mx-4 animate-fadeIn"
+        className="bg-white rounded-lg shadow-md p-6 max-w-lg w-full mx-4 animate-fadeIn"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center">
-            <div className="bg-blue-100 p-2 rounded-full mr-3">
-              <Video size={24} className="text-blue-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900">
-              {editMode ? "Edit Video Lecture" : "Add New Video Lecture"}
-            </h3>
-          </div>
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-medium text-gray-900">
+            {editMode ? "Edit Video Lecture" : "Add New Video Lecture"}
+          </h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
@@ -153,8 +146,8 @@ const AddVideoModal = ({
                 name="title"
                 value={videoData.title}
                 onChange={handleChange}
-                className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.title ? "border-red-500" : "border-gray-300"
+                className={`w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  errors.title ? "border-red-500" : "border-gray-200"
                 }`}
                 placeholder="Enter video title"
               />
@@ -176,8 +169,8 @@ const AddVideoModal = ({
                 value={videoData.description}
                 onChange={handleChange}
                 rows="3"
-                className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
+                className={`w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  errors.description ? "border-red-500" : "border-gray-200"
                 }`}
                 placeholder="Enter video description"
               ></textarea>
@@ -201,8 +194,8 @@ const AddVideoModal = ({
                 name="videoUrl"
                 value={videoData.videoUrl}
                 onChange={handleChange}
-                className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.videoUrl ? "border-red-500" : "border-gray-300"
+                className={`w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  errors.videoUrl ? "border-red-500" : "border-gray-200"
                 }`}
                 placeholder="Enter video URL"
               />
@@ -224,7 +217,7 @@ const AddVideoModal = ({
                 name="videoThumbnail"
                 value={videoData.videoThumbnail}
                 onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Enter thumbnail URL (optional)"
               />
             </div>
@@ -243,8 +236,8 @@ const AddVideoModal = ({
                 value={videoData.duration}
                 onChange={handleChange}
                 min="1"
-                className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.duration ? "border-red-500" : "border-gray-300"
+                className={`w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  errors.duration ? "border-red-500" : "border-gray-200"
                 }`}
                 placeholder="Enter duration in seconds"
               />
@@ -258,19 +251,19 @@ const AddVideoModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+              className="px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-gray-900 rounded-md font-medium transition-colors flex items-center"
+              className="px-4 py-2 text-white bg-gray-900 rounded-md text-sm font-medium"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>
                   {editMode ? "Updating..." : "Saving..."}
                 </>
               ) : (
@@ -295,32 +288,25 @@ const DeleteConfirmationModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
-        className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4 animate-fadeIn"
+        className="bg-white rounded-lg shadow-md p-6 max-w-md w-full mx-4 animate-fadeIn"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center">
-            <div className="bg-red-100 p-2 rounded-full mr-3">
-              <AlertTriangle size={24} className="text-red-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900">
-              Delete Video
-            </h3>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Delete Video</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         <div className="mb-6">
           <p className="text-gray-700 mb-2">
             Are you sure you want to delete{" "}
-            <span className="font-semibold">{videoTitle}</span>?
+            <span className="font-medium">{videoTitle}</span>?
           </p>
           <p className="text-sm text-gray-500">
             This action cannot be undone. The video will be permanently removed
@@ -331,19 +317,19 @@ const DeleteConfirmationModal = ({
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+            className="px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50"
             disabled={isDeleting}
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md font-medium transition-colors flex items-center"
+            className="px-4 py-2 text-white bg-red-500 rounded-md text-sm font-medium hover:bg-red-600"
             disabled={isDeleting}
           >
             {isDeleting ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>
                 Deleting...
               </>
             ) : (
@@ -514,7 +500,7 @@ const CourseDetailsPage = () => {
   if (error) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 p-4">
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 max-w-lg w-full">
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 max-w-lg w-full">
           <h2 className="text-lg font-medium mb-2">Error Loading Course</h2>
           <p>{error}</p>
           <button
@@ -531,7 +517,7 @@ const CourseDetailsPage = () => {
   if (!course) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 p-4">
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-4 max-w-lg w-full">
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 max-w-lg w-full">
           <h2 className="text-lg font-medium mb-2">Course Not Found</h2>
           <p>The requested course could not be found.</p>
           <button
@@ -546,31 +532,27 @@ const CourseDetailsPage = () => {
   }
 
   return (
-    <DashboardLayout className="min-h-screen bg-gray-50">
+    <DashboardLayout>
       {/* Course Header */}
-      <header className="  bg-white border-b shadow-sm">
-        <div className=" max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 ">
+      <header className="bg-white border-b shadow-md">
+        <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="mb-4 md:mb-0">
-              <div className="flex items-center mb-2">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {course.title}
-                </h1>
-                <span className="ml-3 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+              <h1 className="text-xl font-medium text-gray-900">
+                {course.title}{" "}
+                <span className="ml-2 bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded">
                   {course.difficulty}
                 </span>
-              </div>
-              <p className="text-gray-500">{course.category}</p>
+              </h1>
+              <p className="text-gray-500 text-sm">{course.category}</p>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="px-4 py-2 bg-gray-100 rounded-md">
-                <span className="text-lg font-bold">₹{course.price}</span>
-              </div>
+              <span className="text-gray-900 font-medium">₹{course.price}</span>
               <button
-                className="bg-gray-900 text-white px-4 py-2 rounded-md shadow-sm font-medium flex items-center"
+                className="bg-gray-900 text-white px-3 py-1 rounded text-sm  transition-colors"
                 onClick={openAddVideoModal}
               >
-                <Plus size={18} className="mr-1" />
+                <Plus size={16} className="inline mr-1" />
                 Add Video
               </button>
             </div>
@@ -580,11 +562,11 @@ const CourseDetailsPage = () => {
 
       {/* Error Alert */}
       {(submitError || deleteError) && (
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 text-sm">
             <p>Error: {submitError || deleteError}</p>
             <button
-              className="mt-2 text-red-600 hover:text-red-800 underline"
+              className="text-red-600 hover:text-red-800 underline text-xs mt-1"
               onClick={() => {
                 setSubmitError(null);
                 setDeleteError(null);
@@ -597,191 +579,186 @@ const CourseDetailsPage = () => {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="max-w-6xl mx-auto px-4 py-6 ">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4  rounded-md ">
           {/* Course Details */}
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Course Details</h2>
+          <div className="lg:col-span-1 shadow-md">
+            <div className=" p-4 rounded ">
+              <h2 className="text-lg font-medium mb-4 text-gray-900">
+                Course details
+              </h2>
 
               {course.courseThumbnail ? (
                 <img
                   src={course.courseThumbnail}
                   alt={course.title}
-                  className="w-full h-48 object-cover mb-4 rounded"
+                  className="w-full h-40 object-cover mb-4 rounded"
                 />
               ) : (
-                <div className="w-full h-48 bg-gray-100 rounded-md flex items-center justify-center mb-4">
-                  <BookOpen size={48} className="text-gray-400" />
+                <div className="w-full h-40 bg-gray-50 rounded flex items-center justify-center mb-4">
+                  <BookOpen size={32} className="text-gray-300" />
                 </div>
               )}
 
               <div className="mb-4">
-                <h3 className="font-medium text-gray-700 mb-1">Description</h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   {course.description || "No description available."}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <h3 className="font-medium text-gray-700 mb-1">Category</h3>
-                  <p className="text-gray-600">{course.category}</p>
+                  <p className="text-gray-500">Category</p>
+                  <p className="font-medium">{course.category}</p>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-700 mb-1">Difficulty</h3>
-                  <p className="text-gray-600">{course.difficulty}</p>
+                  <p className="text-gray-500">Difficulty</p>
+                  <p className="font-medium">{course.difficulty}</p>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-700 mb-1">Price</h3>
-                  <p className="text-gray-600">₹{course.price}</p>
+                  <p className="text-gray-500">Price</p>
+                  <p className="font-medium">₹{course.price}</p>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-700 mb-1">Videos</h3>
-                  <p className="text-gray-600">{videos.length}</p>
+                  <p className="text-gray-500">Videos</p>
+                  <p className="font-medium">{videos.length}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Video Lectures */}
-          <div className="lg:col-span-2 px-2">
-            <div className="bg-white p-6 rounded-lg shadow-md overflow-auto h-[80vh]">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold">Video Lectures</h2>
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded border border-gray-100 overflow-hidden shadow-md">
+              <div className="flex justify-between items-center p-4 border-b border-gray-100">
+                <h2 className="text-lg font-medium text-gray-900">
+                  Video Lectures
+                </h2>
                 <button
-                  className="bg-gray-900 text-white px-3 py-1 rounded-md shadow-sm text-sm font-medium flex items-center"
+                  className="bg-gray-900 text-white px-3 py-1 rounded text-sm transition-colors"
                   onClick={openAddVideoModal}
                 >
-                  <Plus size={16} className="mr-1" />
+                  <Plus size={16} className="inline mr-1" />
                   Add Video
                 </button>
               </div>
 
-              {videos.length === 0 ? (
-                <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Video size={28} className="text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">
-                    No videos yet
-                  </h3>
-                  <p className="text-gray-500 mb-4">
-                    Add your first video lecture to get started
-                  </p>
-                  <button
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md hover:shadow-xl duration-300 text-white bg-blue-600 hover:bg-blue-700"
-                    onClick={openAddVideoModal}
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Add your first video
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {videos.map((video, index) => (
-                    <div
-                      key={video._id}
-                      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              <div className="px-4 py-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+                {videos.length === 0 ? (
+                  <div className="border border-dashed border-gray-200 rounded p-6 text-center">
+                    <Video size={24} className="text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-base font-medium text-gray-900 mb-1">
+                      No videos yet
+                    </h3>
+                    <p className="text-gray-500 text-sm mb-4">
+                      Add your first video lecture to get started
+                    </p>
+                    <button
+                      className="text-sm px-3 py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
+                      onClick={openAddVideoModal}
                     >
-                      <div className="flex flex-col sm:flex-row">
-                        {/* Video Thumbnail */}
-                        <div className="w-full sm:w-48 h-32 bg-gray-200 flex-shrink-0">
-                          {video.videoThumbnail ? (
-                            <img
-                              src={video.videoThumbnail}
-                              alt={video.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                              <Video size={32} className="text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Video Information */}
-                        <div className="p-4 flex-grow flex flex-col">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="flex items-center">
-                                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-1 rounded mr-2">
-                                  {index + 1}
-                                </span>
-                                <h3 className="text-lg font-medium">
-                                  {video.title}
-                                </h3>
+                      <Plus size={16} className="inline mr-1" />
+                      Add your first video
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {videos.map((video, index) => (
+                      <div
+                        key={video._id}
+                        className="border border-gray-100 rounded hover:border-gray-200 transition-colors"
+                      >
+                        <div className="flex flex-col sm:flex-row">
+                          {/* Video Thumbnail */}
+                          <div className="w-full sm:w-36 h-24 flex-shrink-0">
+                            {video.videoThumbnail ? (
+                              <img
+                                src={video.videoThumbnail}
+                                alt={video.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                                <Video size={24} className="text-gray-300" />
                               </div>
-                              <p className="text-gray-600 text-sm mt-1 mb-2">
-                                {video.description}
-                              </p>
-                            </div>
-
-                            {/* Menu Button */}
-                            <div className="relative">
-                              <button
-                                className="p-1 hover:bg-gray-100 rounded-full"
-                                onClick={(e) => toggleMenu(e, video._id)}
-                              >
-                                <MoreVertical
-                                  size={18}
-                                  className="text-gray-600"
-                                />
-                              </button>
-
-                              {/* Dropdown menu */}
-                              {openMenuId === video._id && (
-                                <div className="absolute right-0 mt-1 w-36 bg-white shadow-lg rounded-md z-10 border border-gray-200">
-                                  <ul className="py-1">
-                                    <li>
-                                      <button
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                                        onClick={(e) => openEditModal(e, video)}
-                                      >
-                                        <Pencil size={16} className="mr-2" />
-                                        Edit
-                                      </button>
-                                    </li>
-                                    <li>
-                                      <button
-                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
-                                        onClick={(e) =>
-                                          openDeleteModal(e, video)
-                                        }
-                                      >
-                                        <Trash2 size={16} className="mr-2" />
-                                        Delete
-                                      </button>
-                                    </li>
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
+                            )}
                           </div>
 
-                          {/* Video Metadata */}
-                          <div className="mt-auto flex items-center text-sm text-gray-500 pt-2">
-                            <div className="flex items-center mr-4">
-                              <Clock size={14} className="mr-1" />
-                              <span>{formatDuration(video.duration)}</span>
+                          {/* Video Information */}
+                          <div className="p-3 flex-grow flex flex-col">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="flex items-center">
+                                  <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full mr-2">
+                                    {index + 1}
+                                  </span>
+                                  <h3 className="text-base font-medium text-gray-900">
+                                    {video.title}
+                                  </h3>
+                                </div>
+                                <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+                                  {video.description}
+                                </p>
+                              </div>
+
+                              {/* Menu Button */}
+                              <div className="relative ml-2">
+                                <button
+                                  className="p-1 hover:bg-gray-50 rounded"
+                                  onClick={(e) => toggleMenu(e, video._id)}
+                                >
+                                  <MoreVertical
+                                    size={16}
+                                    className="text-gray-400"
+                                  />
+                                </button>
+
+                                {/* Dropdown menu */}
+                                {openMenuId === video._id && (
+                                  <div className="absolute right-0 mt-1 w-32 bg-white shadow-md rounded-md z-10 border border-gray-100 text-sm">
+                                    <button
+                                      className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center"
+                                      onClick={(e) => openEditModal(e, video)}
+                                    >
+                                      <Pencil size={14} className="mr-2" />
+                                      Edit
+                                    </button>
+                                    <button
+                                      className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-50 flex items-center"
+                                      onClick={(e) => openDeleteModal(e, video)}
+                                    >
+                                      <Trash2 size={14} className="mr-2" />
+                                      Delete
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
 
-                            <a
-                              href={video.videoUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 flex items-center"
-                            >
-                              <FileText size={14} className="mr-1" />
-                              View Video
-                            </a>
+                            {/* Video Metadata */}
+                            <div className="mt-auto flex items-center text-xs text-gray-500 pt-2">
+                              <div className="flex items-center mr-3">
+                                <Clock size={12} className="mr-1" />
+                                <span>{formatDuration(video.duration)}</span>
+                              </div>
+
+                              <a
+                                href={video.videoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-700 flex items-center"
+                              >
+                                <FileText size={12} className="mr-1" />
+                                View
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
