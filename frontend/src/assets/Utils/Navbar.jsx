@@ -1,19 +1,21 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-// import IconButton from "@mui/material/IconButton";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Backdrop from "@mui/material/Backdrop";
 import Zoom from "@mui/material/Zoom";
 import Fab from "@mui/material/Fab";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import SchoolIcon from "@mui/icons-material/School";
-import InfoIcon from "@mui/icons-material/Info";
-import ArticleIcon from "@mui/icons-material/Article";
-import WorkIcon from "@mui/icons-material/Work";
-import Avatar from "@mui/material/Avatar";
-import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
+import Avatar from "@mui/material/Avatar";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import { logoutUser } from "../Candidate/Services/userAuth";
 import Loader from "../Utils/Loader";
 
@@ -24,9 +26,9 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [hasInstructorAccess, setHasInstructorAccess] = useState(false);
   const menuRef = useRef(null);
-  // const navigate = useNavigate();
-
+  const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("/");
 
@@ -35,28 +37,27 @@ const Navbar = () => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
-    // Initial check
     checkScreenSize();
-
-    // Add event listener for window resize
     window.addEventListener("resize", checkScreenSize);
-
-    // Clean up event listener
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // Check login status on component mount
+  // Check login status and instructor access on component mount
   useEffect(() => {
-    // Check if user is logged in from localStorage or session
     const checkLoginStatus = () => {
       const userData = localStorage.getItem("userData");
+      const authToken = localStorage.getItem("authToken");
+      const instructorData = localStorage.getItem("instructorData");
+
       if (userData) {
         setIsLoggedIn(true);
         setUser(JSON.parse(userData));
       }
-    };
 
+      if (authToken && instructorData) {
+        setHasInstructorAccess(true);
+      }
+    };
     checkLoginStatus();
   }, []);
 
@@ -72,38 +73,32 @@ const Navbar = () => {
         setShowProfileMenu(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  // Toggle FAB menu open/closed
   const toggleFab = () => {
     setFabOpen(!fabOpen);
   };
 
-  // Close FAB menu
   const closeFab = () => {
     setFabOpen(false);
   };
 
-  // Toggle profile menu
   const toggleProfileMenu = () => {
     setShowProfileMenu(!showProfileMenu);
   };
 
-  // Handle logout
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await logoutUser(); // Call the updated logout function
-      localStorage.removeItem("userData"); // Remove user data
+      await logoutUser();
+      localStorage.removeItem("userData");
       setIsLoggedIn(false);
       setUser(null);
       setShowProfileMenu(false);
-      // navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
@@ -115,215 +110,272 @@ const Navbar = () => {
     setActiveTab(path);
   };
 
+  const handleInstructorClick = () => {
+    const authToken = localStorage.getItem("authToken");
+    const instructorData = localStorage.getItem("instructorData");
+    if (authToken && instructorData) {
+      navigate("/instructor-dashboard");
+    } else {
+      navigate("/login-instructor");
+    }
+  };
+
   const fabItems = [
     { icon: <HomeIcon />, label: "Home", link: "/" },
     { icon: <SchoolIcon />, label: "Courses", link: "/get-courses" },
-    { icon: <InfoIcon />, label: "About", link: "/about" },
-    { icon: <ArticleIcon />, label: "Blog", link: "/blog" },
-    { icon: <WorkIcon />, label: "Career", link: "/career" },
+    { icon: <LocalLibraryIcon />, label: "My Learning", link: "/my-learning" },
+    {
+      icon: <AutoStoriesIcon />,
+      label: hasInstructorAccess ? "Instructor" : "Become Mentor",
+      onClick: handleInstructorClick,
+      link: hasInstructorAccess ? "/instructor-dashboard" : "/login-instructor",
+    },
+    { icon: <BookmarkIcon />, label: "Wishlist", link: "/wishlist" },
+    { icon: <ShoppingCartIcon />, label: "My Cart", link: "/Cart" },
   ];
 
-  // Navigation items for desktop
+  // Updated navigation items
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Courses", path: "/get-courses" },
-    { name: "About", path: "/about" },
-    { name: "Blog", path: "/blog" },
-    { name: "Career", path: "/career" },
+    { name: "My Learning", path: "/my-learning" },
+    {
+      name: hasInstructorAccess ? "Instructor" : "Become Mentor",
+      path: hasInstructorAccess ? "/instructor-dashboard" : "/login-instructor",
+      onClick: handleInstructorClick,
+    },
   ];
 
   return (
     <div>
-      <main className="">
-        <nav className="fixed top-0 left-0 w-full p-3 bg-opacity-85 backdrop-blur-sm bg-gray-900 z-40 text-white">
-          <header className="flex justify-between items-center h-8">
-            <div className="flex items-center bg-gray-900 rounded-md p-2">
-              <h1 className="text-xl font-bold text-white">
-                <span className="text-orange-500">L</span>
-                EXICON
-              </h1>
-            </div>
+      <main>
+        <nav className="fixed top-0 left-0 w-full bg-gradient-to-br from-gray-900 to-gray-800  z-40 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4">
+            <header className="flex justify-between items-center h-16">
+              <Link to="/" className="flex items-center">
+                <div className="flex items-center">
+                  <div className="relative">
+                    <span className="absolute inset-0 bg-orange-500 rounded-md "></span>
+                    <h1 className="relative text-2xl font-bold text-white py-1 px-2 rounded-lg">
+                      <span className="text-gray-900 text-2xl font-bold">
+                        L
+                      </span>
+                      <span className="text-gray-100 text-xl">EXICON</span>
+                    </h1>
+                  </div>
+                </div>
+              </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:block">
-              <ul className="flex justify-between items-center gap-8">
-                {navItems.map((item) => (
-                  <Link to={item.path} key={item.path}>
+              {/* Desktop Navigation */}
+              <div className="hidden md:block  ">
+                <ul className="flex justify-between items-center gap-8">
+                  {navItems.map((item) => (
                     <li
-                      className="relative group cursor-pointer"
-                      onClick={() => handleNavClick(item.path)}
+                      key={item.path}
+                      className={`relative group cursor-pointer text-sm font-medium transition-all duration-300 ${
+                        activeTab === item.path
+                          ? "text-orange-400"
+                          : "text-gray-300 hover:text-white"
+                      }`}
+                      onClick={() => {
+                        if (item.onClick) {
+                          item.onClick();
+                        } else {
+                          handleNavClick(item.path);
+                          navigate(item.path);
+                        }
+                      }}
                     >
                       {item.name}
                       <span
-                        className={`absolute left-1/2 bottom-0 block h-[2px] bg-white transform -translate-x-1/2 transition-all duration-300 ${
+                        className={`absolute left-0 bottom-0 block h-0.5 bg-orange-500 transition-all duration-300 ${
                           activeTab === item.path
                             ? "w-full"
                             : "w-0 group-hover:w-full"
                         }`}
                       ></span>
                     </li>
-                  </Link>
-                ))}
-              </ul>
-            </div>
+                  ))}
+                </ul>
+              </div>
 
-            {/* Desktop Login/User Info */}
-            <div className="hidden md:flex justify-between items-center gap-4 text-sm font-semibold">
-              {isLoggedIn ? (
-                <div className="flex items-center gap-4 relative" ref={menuRef}>
+              {/* Desktop Login/User Info */}
+              <div className="hidden md:flex justify-between items-center gap-4 text-sm font-semibold">
+                {" "}
+                <div className="flex justify-center items-center gap-2">
+                  <button className="text-white">
+                    <FavoriteBorderOutlinedIcon fontSize="small" />
+                  </button>
+
+                  <button className="text-white ">
+                    <ShoppingCartOutlinedIcon fontSize="small" />
+                  </button>
+                </div>
+                {isLoggedIn ? (
                   <div
-                    className="flex items-center gap-2 cursor-pointer"
-                    onClick={toggleProfileMenu}
+                    className="flex items-center gap-4 relative"
+                    ref={menuRef}
                   >
-                    <span className="text-white text-xs">{user.name}</span>
+                    <div
+                      className="flex items-center gap-3 cursor-pointer bg-gray-800 hover:bg-gray-700 rounded-full py-1 px-3 transition-all duration-300"
+                      onClick={toggleProfileMenu}
+                    >
+                      <span className="text-gray-300 text-xs">{user.name}</span>
+                      <Avatar
+                        alt={user.name || "User"}
+                        src={user.avatar || ""}
+                        sx={{ width: 28, height: 28 }}
+                        className="cursor-pointer border-2 border-orange-500"
+                      />
+                    </div>
 
-                    <Avatar
-                      alt={user.name || "User"}
-                      src={user.avatar || ""}
-                      sx={{ width: 30, height: 30 }}
-                      className="cursor-pointer "
-                    />
+                    {/* Profile dropdown menu */}
+                    {showProfileMenu && (
+                      <div className="absolute top-full right-0 mt-2 w-56 bg-gray-800 rounded-xl shadow-2xl py-1 z-50 border border-gray-700 overflow-hidden">
+                        <div className="px-4 py-3 border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900">
+                          <p className="text-sm font-medium text-white">
+                            {user.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {user.email || "user@example.com"}
+                          </p>
+                        </div>
+
+                        <Link
+                          to="/profile"
+                          className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-200"
+                        >
+                          <PersonIcon
+                            style={{ fontSize: "16px" }}
+                            className="mr-3 text-gray-400"
+                          />
+                          Profile
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-200"
+                        >
+                          <SettingsIcon
+                            style={{ fontSize: "16px" }}
+                            className="mr-3 text-gray-400"
+                          />
+                          Settings
+                        </Link>
+                        <div className="border-t border-gray-700 my-1"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-200"
+                          disabled={isLoggingOut}
+                        >
+                          {isLoggingOut ? (
+                            <img
+                              src={Loader}
+                              alt="Logging out"
+                              className="h-4 w-4 mr-3"
+                            />
+                          ) : (
+                            <LogoutIcon
+                              className="mr-3 text-gray-400"
+                              style={{ fontSize: "16px" }}
+                            />
+                          )}
+                          {isLoggingOut ? "Logging out..." : "Logout"}
+                        </button>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Profile dropdown menu */}
-                  {showProfileMenu && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
-                      <div className="px-4 py-3 border-b border-gray-700">
-                        <p className="text-sm font-medium text-white">
-                          {user.name}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {user.email || "user@example.com"}
-                        </p>
-                      </div>
-
-                      <Link
-                        to="/profile"
-                        className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
-                      >
-                        <PersonIcon
-                          style={{ fontSize: "16px" }}
-                          className="mr-2"
-                        />
-                        Profile
-                      </Link>
-                      <Link
-                        to="/settings"
-                        className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
-                      >
-                        <SettingsIcon
-                          style={{ fontSize: "16px" }}
-                          className="mr-2"
-                        />
-                        Settings
-                      </Link>
-                      <div className="border-t border-gray-700 my-1"></div>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
-                        disabled={isLoggingOut}
-                      >
-                        {isLoggingOut ? (
-                          <img
-                            src={Loader}
-                            alt="Logging out"
-                            className="h-4 w-4 mr-2"
-                          />
-                        ) : (
-                          <LogoutIcon
-                            className="mr-2"
-                            style={{ fontSize: "16px" }}
-                          />
-                        )}
-                        {isLoggingOut ? "Logging out..." : "Logout"}
+                ) : (
+                  <div className="flex justify-center items-center gap-3">
+                    <Link to="/login">
+                      <button className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg">
+                        Join Now
                       </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link to="/login">
-                  <button className="px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600">
-                    Join Now
-                  </button>
-                </Link>
-              )}
-            </div>
+                    </Link>
+                  </div>
+                )}{" "}
+              </div>
 
-            {/* Mobile User Avatar or Join Button */}
-            <div className="md:hidden relative" ref={isMobile ? menuRef : null}>
-              {isLoggedIn ? (
-                <div className="flex items-center">
-                  <Avatar
-                    alt={user?.name || "User"}
-                    src={user?.avatar || ""}
-                    sx={{ width: 32, height: 32 }}
-                    className="cursor-pointer"
-                    onClick={toggleProfileMenu}
-                  />
+              {/* Mobile User Avatar or Join Button */}
+              <div
+                className="md:hidden relative"
+                ref={isMobile ? menuRef : null}
+              >
+                {isLoggedIn ? (
+                  <div className="flex items-center">
+                    <Avatar
+                      alt={user?.name || "User"}
+                      src={user?.avatar || ""}
+                      sx={{ width: 32, height: 32 }}
+                      className="cursor-pointer border-2 border-orange-500"
+                      onClick={toggleProfileMenu}
+                    />
 
-                  {/* Mobile Profile dropdown menu */}
-                  {showProfileMenu && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
-                      <div className="px-4 py-3 border-b border-gray-700">
-                        <p className="text-sm font-medium text-white">
-                          {user.name}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {user.email || "user@example.com"}
-                        </p>
-                      </div>
-                      <Link
-                        to="/profile"
-                        className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
-                      >
-                        <PersonIcon
-                          style={{ fontSize: "16px" }}
-                          className="mr-2"
-                        />
-                        Profile
-                      </Link>
-                      <Link
-                        to="/settings"
-                        className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700"
-                      >
-                        <SettingsIcon
-                          style={{ fontSize: "16px" }}
-                          className="mr-2"
-                        />
-                        Settings
-                      </Link>
-                      <div className="border-t border-gray-700 my-1"></div>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
-                        disabled={isLoggingOut}
-                      >
-                        {isLoggingOut ? (
-                          <img
-                            src={Loader}
-                            alt="Logging out"
-                            className="h-4 w-4 mr-2"
-                          />
-                        ) : (
-                          <LogoutIcon
-                            className="mr-2"
+                    {/* Mobile Profile dropdown menu */}
+                    {showProfileMenu && (
+                      <div className="absolute top-full right-0 mt-2 w-56 bg-gray-800 rounded-xl shadow-2xl py-1 z-50 border border-gray-700 overflow-hidden">
+                        <div className="px-4 py-3 border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900">
+                          <p className="text-sm font-medium text-white">
+                            {user.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {user.email || "user@example.com"}
+                          </p>
+                        </div>
+                        <Link
+                          to="/profile"
+                          className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-200"
+                        >
+                          <PersonIcon
                             style={{ fontSize: "16px" }}
+                            className="mr-3 text-gray-400"
                           />
-                        )}
-                        {isLoggingOut ? "Logging out..." : "Logout"}
+                          Profile
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-200"
+                        >
+                          <SettingsIcon
+                            style={{ fontSize: "16px" }}
+                            className="mr-3 text-gray-400"
+                          />
+                          Settings
+                        </Link>
+                        <div className="border-t border-gray-700 my-1"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-200"
+                          disabled={isLoggingOut}
+                        >
+                          {isLoggingOut ? (
+                            <img
+                              src={Loader}
+                              alt="Logging out"
+                              className="h-4 w-4 mr-3"
+                            />
+                          ) : (
+                            <LogoutIcon
+                              className="mr-3 text-gray-400"
+                              style={{ fontSize: "16px" }}
+                            />
+                          )}
+                          {isLoggingOut ? "Logging out..." : "Logout"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex justify-center items-center gap-3">
+                    <Link to="/login">
+                      <button className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg">
+                        Join Now
                       </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link to="/login">
-                  <button className="px-3 py-1 bg-orange-500  text-white rounded-full text-sm hover:bg-orange-600">
-                    Join Now
-                  </button>
-                </Link>
-              )}
-            </div>
-          </header>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </header>
+          </div>
         </nav>
 
         {/* FAB Navigation for Mobile */}
@@ -345,11 +397,12 @@ const Navbar = () => {
                 bottom: 16,
                 right: 16,
                 zIndex: 50,
-                bgcolor: fabOpen ? "#ef4444" : "#f97316", // Orange when closed, red when open
+                bgcolor: fabOpen ? "#ef4444" : "#f97316",
                 "&:hover": {
                   bgcolor: fabOpen ? "#dc2626" : "#ea580c",
                 },
                 transition: "background-color 0.3s",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
               }}
               onClick={toggleFab}
             >
@@ -380,11 +433,14 @@ const Navbar = () => {
                 }}
               >
                 <Fab
-                  component={Link}
-                  to={item.link}
                   onClick={() => {
                     closeFab();
-                    setActiveTab(item.link);
+                    if (item.onClick) {
+                      item.onClick();
+                    } else {
+                      setActiveTab(item.link);
+                      navigate(item.link);
+                    }
                   }}
                   size="small"
                   color="secondary"
@@ -394,11 +450,12 @@ const Navbar = () => {
                     bottom: 16 + (index + 1) * 60,
                     right: 16,
                     zIndex: 50,
-                    bgcolor: activeTab === item.link ? "#f97316" : "#1f2937", // Orange if active, gray otherwise
+                    bgcolor: activeTab === item.link ? "#f97316" : "#1f2937",
                     color: "white",
                     "&:hover": {
                       bgcolor: activeTab === item.link ? "#ea580c" : "#111827",
                     },
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   {item.icon}
@@ -410,7 +467,7 @@ const Navbar = () => {
             {fabItems.map((item, index) => (
               <div
                 key={`label-${index}`}
-                className={`fixed z-50 bg-gray-800 text-white text-sm py-1 px-3 rounded-md transition-all duration-300 ease-in-out ${
+                className={`fixed z-50 bg-gray-800 text-white text-sm py-1 px-3 rounded-md transition-all duration-300 ease-in-out shadow-lg ${
                   fabOpen
                     ? "opacity-100 right-4 translate-x-[-60px]"
                     : "opacity-0 right-16 translate-x-[20px]"

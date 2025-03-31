@@ -10,6 +10,8 @@ import InstructorLogin from "./assets/Instructor/Components/Auth/Login";
 import InstructorSignin from "./assets/Instructor/Components/Auth/Signup";
 import CourseDetailsPage from "./assets/Instructor/DashboardComponents/CourseDetailsPage";
 import CustomVideoPlayer from "./assets/Instructor/DashboardComponents/CustomVideoPlayer";
+import Profile from "./assets/Candidate/Components/CandidateProfile/Profile";
+import Setting from "./assets/Candidate/Components/CandidateProfile/Setting";
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
           path="/courses/:courseId/player"
           element={<CustomVideoPlayer />}
         />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Setting />} />
       </Routes>
     </Router>
   );

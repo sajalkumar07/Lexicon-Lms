@@ -12,6 +12,7 @@ export default defineConfig({
     alias: {
       "lucide-react": "lucide-react", // Keeping this as per your request
       "@images": path.resolve(__dirname, "src/assets/Candidate/images"), // Fixed relative path
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {

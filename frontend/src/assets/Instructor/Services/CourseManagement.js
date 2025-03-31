@@ -250,3 +250,48 @@ export const updateVideoLecture = async (courseId, videoId, videoData) => {
     throw error;
   }
 };
+
+export const uploadImage = async (imageFile) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", imageFile);
+
+    const response = await fetch(`${config.apiUrl}/api/upload-image`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to upload image");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw error;
+  }
+};
+
+// Upload a video without authentication
+export const uploadVideo = async (videoFile) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", videoFile);
+
+    const response = await fetch(`${config.apiUrl}/api/upload-video`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to upload video");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error uploading video:", error);
+    throw error;
+  }
+};
