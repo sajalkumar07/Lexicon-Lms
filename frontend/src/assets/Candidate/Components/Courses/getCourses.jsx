@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../../Utils/Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
-import Cat from "../../../Instructor/images/cat.jpg";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Loader from "../../../Utils/Loader";
 import { fetchAllCourses } from "../../Services/getCourses";
+import { BookOpen } from "lucide-react";
 
 const GetCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -192,12 +192,18 @@ const GetCourses = () => {
                     onClick={() => navigateToCourseDetails(course._id)}
                   >
                     {/* Course image section with difficulty badge */}
-                    <div className="relative w-full h-40">
-                      <img
-                        src={Cat}
-                        className="w-full h-full object-cover"
-                        alt={course.title}
-                      />
+                    <div className="relative w-full h-48">
+                      {course.courseThumbnail ? (
+                        <img
+                          src={course.courseThumbnail}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                          <BookOpen size={24} className="text-gray-400" />
+                        </div>
+                      )}
                       <div className="absolute top-0 right-0 bg-orange-500 rounded-bl text-white font-semibold text-xs px-2 py-1">
                         {course.difficulty || "Beginner"}
                       </div>

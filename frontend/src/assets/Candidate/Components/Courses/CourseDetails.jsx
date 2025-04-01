@@ -183,7 +183,7 @@ const CourseDetailsPage = () => {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-gray-50">
+    <div className="relative min-h-screen overflow-x-hidden bg-gray-50 py-14 px-2">
       <Navbar />
 
       {/* Course Header */}
@@ -220,12 +220,12 @@ const CourseDetailsPage = () => {
           {/* Left Column - Course Info and Features */}
           <div className="lg:col-span-2 space-y-8">
             {/* Course Thumbnail */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden ">
               {course.courseThumbnail ? (
                 <img
                   src={course.courseThumbnail}
                   alt={course.title}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-56 object-cover"
                 />
               ) : (
                 <div className="w-full h-64 bg-gray-100 flex items-center justify-center">
