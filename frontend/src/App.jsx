@@ -12,6 +12,7 @@ import CourseDetailsPage from "./assets/Instructor/DashboardComponents/CourseDet
 import CustomVideoPlayer from "./assets/Instructor/DashboardComponents/CustomVideoPlayer";
 import Profile from "./assets/Candidate/Components/CandidateProfile/Profile";
 import Setting from "./assets/Candidate/Components/CandidateProfile/Setting";
+import CourseDetailsCandidate from "./assets/Candidate/Components/Courses/CourseDetails";
 
 function App() {
   return (
@@ -36,6 +37,10 @@ function App() {
         />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Setting />} />
+        <Route
+          path="/candidate/courses/:courseId"
+          element={<CourseDetailsCandidate />}
+        />
       </Routes>
     </Router>
   );

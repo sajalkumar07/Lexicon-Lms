@@ -44,6 +44,10 @@ const GetCourses = () => {
     // You could add category filtering here
   };
 
+  const navigateToCourseDetails = (courseId) => {
+    window.open(`/candidate/courses/${courseId}`, "_blank");
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -184,7 +188,8 @@ const GetCourses = () => {
                 {courses.map((course) => (
                   <div
                     key={course._id}
-                    className="bg-white rounded-lg overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all duration-300"
+                    className="bg-white rounded-lg cursor-pointer overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-all duration-300"
+                    onClick={() => navigateToCourseDetails(course._id)}
                   >
                     {/* Course image section with difficulty badge */}
                     <div className="relative w-full h-40">
