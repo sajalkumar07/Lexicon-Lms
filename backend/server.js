@@ -8,6 +8,8 @@ const courseRoutes = require("./app/routes/coursesRoutes");
 const corsOptions = require("./app/config/config");
 const imageRoutes = require("./app/routes/imageRoutes");
 const videoRoutes = require("./app/routes/videoRoutes");
+const questionRoutes = require("./app/routes/questionRoutes");
+const answerRoutes = require("./app/routes/answerRoutes");
 
 dotenv.config();
 const app = express();
@@ -25,6 +27,8 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/instructor-auth", instructorAuth);
 app.use("/api", imageRoutes);
 app.use("/api", videoRoutes);
+app.use("/api/courses/:courseId/questions", questionRoutes);
+app.use("/api/questions/:questionId/answers", answerRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

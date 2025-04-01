@@ -48,19 +48,7 @@ const CourseDetailsPage = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [questionText, setQuestionText] = useState("");
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      text: "Will this course cover advanced topics?",
-      answer: "Yes, we cover both basic and advanced concepts.",
-    },
-    {
-      id: 2,
-      text: "Is there a certificate upon completion?",
-      answer:
-        "Absolutely! You'll receive a certificate after finishing all lectures.",
-    },
-  ]);
+  const [questions, setQuestions] = useState([]);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submittedRating, setSubmittedRating] = useState(false);
