@@ -834,7 +834,7 @@ const CreateCoursePopup = ({ isOpen, onClose }) => {
 
   // Modal renders when isOpen is true
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 transition-opacity backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 transition-opacity overflow-y-auto">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl relative overflow-hidden animate-fade-in my-8">
         {/* Header */}
         <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-6 text-white">
