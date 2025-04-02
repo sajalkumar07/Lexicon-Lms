@@ -4,22 +4,25 @@ import { Link, useParams } from "react-router-dom";
 import {
   BookOpen,
   Video,
-  Plus,
   Clock,
   Play,
-  MoreVertical,
-  Pencil,
-  Trash2,
   Star,
   MessageSquare,
   CreditCard,
   Check,
+  Send,
 } from "lucide-react";
 import Loader from "../../../Utils/Loader";
 import {
   fetchCourseDetails,
   fetchCourseVideos,
 } from "../../Services/getCourses";
+import {
+  postQuestion,
+  fetchCourseQuestions,
+  postAnswer,
+  fetchQuestionAnswers,
+} from "../../Services/qanda";
 import Navbar from "../../../Utils/Navbar";
 
 const formatDuration = (seconds) => {
@@ -49,9 +52,14 @@ const CourseDetailsPage = () => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [questionText, setQuestionText] = useState("");
   const [questions, setQuestions] = useState([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionError, setQuestionError] = useState(null);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submittedRating, setSubmittedRating] = useState(false);
+  const [expandedQuestionId, setExpandedQuestionId] = useState(null);
+  const [answerText, setAnswerText] = useState("");
+  const [loadingAnswers, setLoadingAnswers] = useState(false);
 
   // Fetch course details and videos on component mount
   useEffect(() => {
@@ -76,6 +84,27 @@ const CourseDetailsPage = () => {
     loadCourseData();
   }, [courseId]);
 
+  // Fetch questions for the course
+  useEffect(() => {
+    const loadQuestions = async () => {
+      if (!courseId) return;
+
+      try {
+        setLoadingQuestions(true);
+        setQuestionError(null);
+        const data = await fetchCourseQuestions(courseId);
+        setQuestions(data.questions || []);
+      } catch (err) {
+        setQuestionError(err.message || "Failed to load questions");
+        console.error("Error loading questions:", err);
+      } finally {
+        setLoadingQuestions(false);
+      }
+    };
+
+    loadQuestions();
+  }, [courseId]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
@@ -87,12 +116,6 @@ const CourseDetailsPage = () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
-
-  // Toggle dropdown menu
-  const toggleMenu = (e, videoId) => {
-    e.stopPropagation();
-    setOpenMenuId(openMenuId === videoId ? null : videoId);
-  };
 
   // Payment handlers
   const handlePayment = () => {
@@ -107,25 +130,205 @@ const CourseDetailsPage = () => {
   };
 
   // Question handlers
-  const handleQuestionSubmit = (e) => {
+  const handleQuestionSubmit = async (e) => {
     e.preventDefault();
-    if (questionText.trim()) {
-      const newQuestion = {
-        id: questions.length + 1,
-        text: questionText,
-        answer: "Your instructor will answer this question soon.",
-      };
-      setQuestions([...questions, newQuestion]);
+    if (!questionText.trim()) return;
+
+    try {
+      const response = await postQuestion(courseId, questionText);
+      // After successful post, refresh questions
+      const updatedQuestions = await fetchCourseQuestions(courseId);
+      setQuestions(updatedQuestions.questions || []);
       setQuestionText("");
+    } catch (err) {
+      console.error("Error submitting question:", err);
+      // Show error to user
+      alert(`Failed to submit question: ${err.message}`);
     }
   };
 
   // Rating handlers
   const handleRatingSubmit = () => {
+    // Here you could implement a real API call to submit the rating
     setSubmittedRating(true);
     setTimeout(() => {
       setSubmittedRating(false);
     }, 2000);
+  };
+
+  const handleExpandQuestion = async (questionId) => {
+    if (expandedQuestionId === questionId) {
+      setExpandedQuestionId(null); // Collapse if already expanded
+      return;
+    }
+
+    setExpandedQuestionId(questionId);
+    setLoadingAnswers(true);
+
+    try {
+      const answersData = await fetchQuestionAnswers(questionId);
+
+      // Update the questions state to include the fetched answers
+      setQuestions((prevQuestions) =>
+        prevQuestions.map((q) =>
+          q._id === questionId ? { ...q, answers: answersData.data || [] } : q
+        )
+      );
+    } catch (err) {
+      console.error("Error fetching answers:", err);
+      // Optionally show error to user
+    } finally {
+      setLoadingAnswers(false);
+    }
+  };
+
+  // Function to handle submitting an answer
+  const handleAnswerSubmit = async (questionId) => {
+    if (!answerText.trim()) return;
+
+    try {
+      await postAnswer(questionId, answerText);
+
+      // Refresh answers for this question
+      const answersData = await fetchQuestionAnswers(questionId);
+
+      // Update the questions state
+      setQuestions((prevQuestions) =>
+        prevQuestions.map((q) =>
+          q._id === questionId ? { ...q, answers: answersData.data || [] } : q
+        )
+      );
+
+      setAnswerText("");
+    } catch (err) {
+      console.error("Error submitting answer:", err);
+      alert(`Failed to submit answer: ${err.message}`);
+    }
+  };
+
+  const renderQASection = () => {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h3 className="text-lg font-bold mb-4 text-gray-900">
+          Have Questions?
+        </h3>
+        <form onSubmit={handleQuestionSubmit} className="mb-4">
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+              placeholder="Ask your question..."
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <MessageSquare size={18} />
+            </button>
+          </div>
+        </form>
+
+        {loadingQuestions ? (
+          <div className="flex justify-center py-4">
+            <Loader />
+          </div>
+        ) : questionError ? (
+          <div className="text-center py-4 text-red-500">
+            <p>{questionError}</p>
+            <button
+              onClick={() => {
+                fetchCourseQuestions(courseId)
+                  .then((data) => setQuestions(data.questions || []))
+                  .catch((err) => setQuestionError(err.message));
+              }}
+              className="mt-2 text-blue-500 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4 max-h-80 overflow-y-auto">
+            {questions.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">
+                <p>No questions yet. Be the first to ask!</p>
+              </div>
+            ) : (
+              questions.map((q) => (
+                <div
+                  key={q._id}
+                  className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="font-medium text-gray-900">
+                      Q: {q.content}
+                    </div>
+                    <button
+                      onClick={() => handleExpandQuestion(q._id)}
+                      className="text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      {expandedQuestionId === q._id ? "Hide" : "View"}
+                    </button>
+                  </div>
+
+                  {/* Show answers when question is expanded */}
+                  {expandedQuestionId === q._id && (
+                    <div className="mt-3 pl-4 border-l-2 border-gray-200">
+                      {loadingAnswers ? (
+                        <div className="py-2 flex justify-center">
+                          <Loader />
+                        </div>
+                      ) : (
+                        <>
+                          {/* Display existing answers */}
+                          {q.answers && q.answers.length > 0 ? (
+                            <div className="space-y-2 mb-3">
+                              {q.answers.map((answer, idx) => (
+                                <div
+                                  key={answer._id || idx}
+                                  className="bg-gray-50 p-3 rounded-lg"
+                                >
+                                  <p className="text-gray-700">
+                                    <span className="font-medium">A:</span>{" "}
+                                    {answer.content}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-gray-500 italic mb-3">
+                              No answers yet
+                            </div>
+                          )}
+
+                          {/* Answer input form */}
+                          <div className="flex mt-2">
+                            <input
+                              type="text"
+                              value={answerText}
+                              onChange={(e) => setAnswerText(e.target.value)}
+                              placeholder="Add an answer..."
+                              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500"
+                            />
+                            <button
+                              onClick={() => handleAnswerSubmit(q._id)}
+                              className="px-3 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700"
+                            >
+                              <Send size={16} />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -316,43 +519,8 @@ const CourseDetailsPage = () => {
               </div>
             </div>
 
-            {/* Q&A Section (hardcoded) */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900">
-                Have Questions?
-              </h3>
-              <form onSubmit={handleQuestionSubmit} className="mb-4">
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={questionText}
-                    onChange={(e) => setQuestionText(e.target.value)}
-                    placeholder="Ask your question..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    <MessageSquare size={18} />
-                  </button>
-                </div>
-              </form>
-
-              <div className="space-y-4 max-h-64 overflow-y-auto">
-                {questions.map((q) => (
-                  <div
-                    key={q.id}
-                    className="border-b border-gray-100 pb-4 last:border-0 last:pb-0"
-                  >
-                    <div className="font-medium text-gray-900">Q: {q.text}</div>
-                    <div className="mt-1 text-gray-600 bg-gray-50 p-2 rounded">
-                      <span className="font-medium">A:</span> {q.answer}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Q&A Section with API Integration */}
+            {renderQASection()}
 
             {/* Rating Section (hardcoded) */}
             <div className="bg-white rounded-xl shadow-sm p-6">

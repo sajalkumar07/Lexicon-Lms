@@ -3,9 +3,6 @@ const Course = require("../models/CourseSchema");
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 
-// @desc    Create a new question
-// @route   POST /api/courses/:courseId/questions
-// @access  Public (but requires user authentication)
 exports.createQuestion = asyncHandler(async (req, res) => {
   const { content } = req.body;
   const { courseId } = req.params;
