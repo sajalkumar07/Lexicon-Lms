@@ -13,6 +13,7 @@ import {
   Send,
 } from "lucide-react";
 import Loader from "../../../Utils/Loader";
+import QandALoader from "../../../Utils/Q&ALoader";
 import {
   fetchCourseDetails,
   fetchCourseVideos,
@@ -232,7 +233,7 @@ const CourseDetailsPage = () => {
 
         {loadingQuestions ? (
           <div className="flex justify-center py-4">
-            <Loader />
+            <QandALoader />
           </div>
         ) : questionError ? (
           <div className="text-center py-4 text-red-500">
@@ -277,7 +278,7 @@ const CourseDetailsPage = () => {
                     <div className="mt-3 pl-4 border-l-2 border-gray-200">
                       {loadingAnswers ? (
                         <div className="py-2 flex justify-center">
-                          <Loader />
+                          <QandALoader />
                         </div>
                       ) : (
                         <>

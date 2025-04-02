@@ -178,7 +178,7 @@ const Login = () => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <img src={Loader} alt="Loading" className="h-8 w-8" />
+                  <img src={Loader} alt="Loading" className="h-40 w-60" />
                 ) : (
                   "Login"
                 )}
