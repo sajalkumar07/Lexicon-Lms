@@ -22,7 +22,7 @@ import {
   fetchCourseQuestions,
   postAnswer,
   fetchQuestionAnswers,
-} from "../../Services/qanda";
+} from "../../Services/qaService";
 import Navbar from "../../../Utils/Navbar";
 
 const formatDuration = (seconds) => {
