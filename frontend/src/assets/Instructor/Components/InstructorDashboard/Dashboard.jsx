@@ -1,15 +1,13 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "./DashboardLayout";
 import {
   User,
-  BarChart3,
   Star,
   DollarSign,
   MessageCircle,
-  BookOpen,
   Bell,
   Calendar,
   TrendingUp,
@@ -18,20 +16,125 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Loader from "../../../Utils/Loader";
+import { fetchInstructorCourseRatings } from "../../Services/ratingAndFeedback";
 
 const InstructorDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timeRange, setTimeRange] = useState("monthly"); // monthly, quarterly, yearly
   const [selectedChart, setSelectedChart] = useState("revenue"); // revenue, students, engagement
   const [expandedNotification, setExpandedNotification] = useState(null);
+  const [ratingsData, setRatingsData] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [instructorId, setInstructorId] = useState(null); // This should be dynamic, get from auth context
+  const [expandedCourse, setExpandedCourse] = useState(null);
+
+  useEffect(() => {
+    // Get instructor data from localStorage
+    try {
+      const instructorDataString = localStorage.getItem("instructorData");
+      if (instructorDataString) {
+        const instructorData = JSON.parse(instructorDataString);
+        // Set the instructor ID from localStorage data
+        if (instructorData && instructorData._id) {
+          setInstructorId(instructorData._id);
+        } else if (instructorData && instructorData.instructor) {
+          // In case the ID is nested under an 'instructor' property
+          setInstructorId(instructorData.instructor);
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Error retrieving instructor data from localStorage:",
+        error
+      );
+    }
+  }, []);
+
+  const processRecentRatings = (ratings) => {
+    // Get timestamp for 12 hours ago
+    const twelveHoursAgo = new Date();
+    twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 12);
+
+    // Filter ratings from the last 12 hours
+    const recentRatings = ratings.filter((rating) => {
+      const ratingDate = new Date(rating.createdAt);
+      return ratingDate >= twelveHoursAgo;
+    });
+
+    // Transform ratings into activity notifications
+    const activities = recentRatings.map((rating, index) => {
+      const ratingDate = new Date(rating.createdAt);
+
+      return {
+        id: rating._id,
+        type: "review",
+        title: `New ${rating.rating} star review`,
+        course: rating.course.title,
+        time: getTimeAgo(ratingDate),
+        message: rating.feedback || "No feedback provided",
+        rating: rating.rating,
+        user: rating.user
+          ? `${rating.user.firstName} ${rating.user.lastName}`
+          : "Anonymous User",
+      };
+    });
+
+    // Set the activities to state
+    setRecentActivity(activities);
+  };
+
+  useEffect(() => {
+    // Load ratings data when component mounts and instructorId is available
+    const loadRatingsData = async () => {
+      if (!instructorId) return; // Don't fetch if we don't have an ID
+
+      try {
+        const data = await fetchInstructorCourseRatings(instructorId);
+        setRatingsData(data);
+
+        // Process recent ratings (last 12 hours) into activity notifications
+        processRecentRatings(data.ratings);
+      } catch (err) {
+        setError("Failed to load ratings data");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadRatingsData();
+  }, [instructorId]);
+
+  // Helper function to calculate time ago
+  const getTimeAgo = (date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds} seconds ago`;
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} minute${diffInMinutes === 1 ? "" : "s"} ago`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours === 1 ? "" : "s"} ago`;
+    }
+
+    // If this part is reached, it's outside our 12-hour window but included for completeness
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays === 1 ? "" : "s"} ago`;
+  };
 
   // Data directly embedded in the component
   const dashboardData = {
     stats: {
       revenue: 45250,
       students: 413,
-      rating: 4.7,
+      rating: ratingsData?.averageRating || 0,
       completionRate: 76,
       revenueTrend: 12.5,
       studentsTrend: 8.3,
@@ -53,55 +156,6 @@ const InstructorDashboard = () => {
       { name: "Apr", students: 78 },
       { name: "May", students: 89 },
       { name: "Jun", students: 102 },
-    ],
-    coursePerformance: [
-      { name: "Web Development", students: 87, rating: 4.7, revenue: 8900 },
-      { name: "React Fundamentals", students: 65, rating: 4.5, revenue: 6500 },
-      { name: "Python Masterclass", students: 92, rating: 4.8, revenue: 9200 },
-      { name: "UX Design", students: 43, rating: 4.3, revenue: 4300 },
-    ],
-    notifications: [
-      {
-        id: 1,
-        type: "review",
-        title: "New Review on React Fundamentals",
-        message:
-          "Excellent course! The concepts are well explained and the examples are practical.",
-        rating: 5,
-        user: "Priya Sharma",
-        time: "2 hours ago",
-        course: "React Fundamentals",
-      },
-      {
-        id: 2,
-        type: "enrollment",
-        title: "New Student Enrolled",
-        message: "Rahul Verma has enrolled in your Python Masterclass course.",
-        user: "Rahul Verma",
-        time: "5 hours ago",
-        course: "Python Masterclass",
-      },
-      {
-        id: 3,
-        type: "question",
-        title: "New Question on Web Development",
-        message:
-          "I'm having trouble with the responsive layout section. Could you provide additional examples?",
-        user: "Ankit Patel",
-        time: "Yesterday",
-        course: "Web Development",
-      },
-      {
-        id: 4,
-        type: "review",
-        title: "New Review on UX Design",
-        message:
-          "Good content but could use more practical exercises. The theoretical parts are strong.",
-        rating: 4,
-        user: "Meera Desai",
-        time: "2 days ago",
-        course: "UX Design",
-      },
     ],
     upcomingSchedule: [
       {
@@ -127,15 +181,6 @@ const InstructorDashboard = () => {
       },
     ],
   };
-
-  // Simulate loading effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const CardStat = ({ title, value, icon, trend, color }) => (
     <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow">
@@ -231,6 +276,32 @@ const InstructorDashboard = () => {
             />
           </button>
         </div>
+      </div>
+    );
+  };
+
+  // Component to display star rating
+  const RatingStars = ({ rating }) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    return (
+      <div className="flex items-center">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            size={14}
+            className={
+              i < fullStars
+                ? "text-yellow-500"
+                : i === fullStars && hasHalfStar
+                ? "text-yellow-500 half-filled"
+                : "text-gray-300"
+            }
+            fill={i < fullStars ? "#F59E0B" : "none"}
+          />
+        ))}
+        <span className="ml-1 text-gray-700">{rating}</span>
       </div>
     );
   };
@@ -354,7 +425,11 @@ const InstructorDashboard = () => {
               />
               <CardStat
                 title="Avg. Rating"
-                value={dashboardData.stats.rating}
+                value={
+                  ratingsData
+                    ? parseFloat(ratingsData.averageRating).toFixed(1)
+                    : "0.0"
+                }
                 icon={<Star size={18} className="text-white" />}
                 trend={dashboardData.stats.ratingTrend}
                 color="bg-yellow-500"
@@ -394,42 +469,56 @@ const InstructorDashboard = () => {
                             Course
                           </th>
                           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Students
-                          </th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Rating
-                          </th>
-                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Revenue
                           </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {dashboardData.coursePerformance.map(
-                          (course, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                {course.name}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-500">
-                                {course.students}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-500">
-                                <div className="flex items-center">
-                                  {course.rating}
-                                  <Star
-                                    size={14}
-                                    className="text-yellow-500 ml-1"
-                                    fill="#F59E0B"
-                                  />
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-500">
-                                ₹{course.revenue}
-                              </td>
-                            </tr>
-                          )
-                        )}
+                        {ratingsData &&
+                          ratingsData.ratings
+                            .reduce((courses, rating) => {
+                              const existingCourse = courses.find(
+                                (course) =>
+                                  course.courseId === rating.course._id
+                              );
+
+                              if (existingCourse) {
+                                existingCourse.ratingCount++;
+                                existingCourse.totalRating += rating.rating;
+                              } else {
+                                courses.push({
+                                  courseId: rating.course._id,
+                                  title: rating.course.title,
+                                  ratingCount: 1,
+                                  totalRating: rating.rating,
+                                });
+                              }
+
+                              return courses;
+                            }, [])
+                            .map((course, index) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                  {course.title}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-500">
+                                  <div className="flex items-center">
+                                    <RatingStars
+                                      rating={(
+                                        course.totalRating / course.ratingCount
+                                      ).toFixed(1)}
+                                    />
+                                    <span className="ml-2 text-xs text-gray-500">
+                                      ({course.ratingCount}{" "}
+                                      {course.ratingCount === 1
+                                        ? "review"
+                                        : "reviews"}
+                                      )
+                                    </span>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
                       </tbody>
                     </table>
                   </div>
@@ -438,29 +527,39 @@ const InstructorDashboard = () => {
 
               {/* Right Column - Notifications + Calendar */}
               <div className="lg:col-span-1">
-                {/* Notifications Panel */}
+                {/* Recent Activity Panel */}
                 <div className="bg-white rounded-lg border border-gray-200 mb-6">
                   <div className="flex justify-between items-center p-4 border-b border-gray-100">
                     <h3 className="text-lg font-medium text-gray-900">
                       Recent Activity
                     </h3>
                     <span className="bg-blue-100 text-blue-800 text-xs font-medium rounded-full px-2 py-0.5">
-                      {dashboardData.notifications.length} new
+                      {recentActivity.length} new
                     </span>
                   </div>
 
                   <div className="max-h-96 overflow-y-auto">
-                    {dashboardData.notifications.map((notification) => (
-                      <NotificationItem
-                        key={notification.id}
-                        notification={notification}
-                      />
-                    ))}
+                    {recentActivity.length > 0 ? (
+                      recentActivity.map((activity) => (
+                        <NotificationItem
+                          key={activity.id}
+                          notification={activity}
+                        />
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-gray-500">
+                        <Bell
+                          size={24}
+                          className="mx-auto mb-2 text-gray-400"
+                        />
+                        <p>No new ratings in the last 12 hours</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-3 border-t border-gray-100 text-center">
                     <button className="text-sm text-blue-600 hover:text-blue-800">
-                      View all notifications
+                      View all activity
                     </button>
                   </div>
                 </div>

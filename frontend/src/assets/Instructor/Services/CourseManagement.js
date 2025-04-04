@@ -3,7 +3,7 @@ import config from "../../../../config";
 // Fetch a specific course's details
 export const fetchCourseDetails = async (courseId) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/course/${courseId}`,
@@ -30,7 +30,7 @@ export const fetchCourseDetails = async (courseId) => {
 // Fetch videos for a specific course
 export const fetchCourseVideos = async (courseId) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/course/${courseId}/videos`,
@@ -57,7 +57,7 @@ export const fetchCourseVideos = async (courseId) => {
 // Add a new video lecture to a course
 export const addVideoLecture = async (courseId, videoData) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/course/${courseId}/videos`,
@@ -86,7 +86,7 @@ export const addVideoLecture = async (courseId, videoData) => {
 // Delete a video lecture from a course
 export const deleteVideoLecture = async (courseId, videoId) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/deleteCourse/${courseId}/videos/${videoId}`,
@@ -114,7 +114,7 @@ export const deleteVideoLecture = async (courseId, videoId) => {
 // Get all courses for an instructor
 export const fetchAllInstructorCourses = async () => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/instructorCourses`,
@@ -142,7 +142,7 @@ export const fetchAllInstructorCourses = async () => {
 // Create a new course
 export const createCourse = async (courseData) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(`${config.apiUrl}/api/courses/createCourse`, {
       method: "POST",
@@ -168,7 +168,7 @@ export const createCourse = async (courseData) => {
 // Delete a course
 export const deleteCourse = async (courseId) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/deleteCourse/${courseId}`,
@@ -196,7 +196,7 @@ export const deleteCourse = async (courseId) => {
 // Update a course
 export const updateCourse = async (courseId, courseData) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/updateCourse/${courseId}`,
@@ -225,7 +225,7 @@ export const updateCourse = async (courseId, courseData) => {
 // Update a video lecture
 export const updateVideoLecture = async (courseId, videoId, videoData) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/updateCourse/${courseId}/videos/${videoId}`,

@@ -18,7 +18,7 @@ export const loginUser = async ({ email, password }) => {
       throw new Error(data.message || "Failed to login");
     }
     if (data.token) {
-      localStorage.setItem("authToken", data.token); // Store token
+      localStorage.setItem("instructorAuthToken", data.token); // Store token
     }
     return data;
   } catch (error) {
@@ -67,7 +67,7 @@ export const registerUser = async ({
 export const logoutInstructor = async () => {
   try {
     // Get the auth token
-    const authToken = localStorage.getItem("authToken");
+    const instructorAuthToken = localStorage.getItem("instructorAuthToken");
 
     const response = await fetch(
       `${config.apiUrl}/api/instructor-auth/logout`,
@@ -75,14 +75,14 @@ export const logoutInstructor = async () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`, // Add token in Authorization header
+          Authorization: `Bearer ${instructorAuthToken}`, // Add token in Authorization header
         },
         // credentials: "include", // Remove this if your API doesn't require credentials
       }
     );
 
     // Even if the server request fails, we should clean up on the client side
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("instructorAuthToken");
 
     // Try to parse response, but don't let it block logout functionality
     try {
@@ -97,7 +97,7 @@ export const logoutInstructor = async () => {
   } catch (error) {
     console.error("Logout error:", error);
     // Still remove token even if API call fails
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("instructorAuthToken");
     return { success: true, message: "Logged out locally" };
   }
 };

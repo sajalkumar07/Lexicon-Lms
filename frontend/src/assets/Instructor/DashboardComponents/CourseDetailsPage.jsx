@@ -12,8 +12,7 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-  FileVideo,
-  Image,
+  Send,
 } from "lucide-react";
 import Loader from "../../Utils/Loader";
 import {
@@ -22,11 +21,16 @@ import {
   addVideoLecture,
   deleteVideoLecture,
   updateVideoLecture,
-  uploadImage,
-  uploadVideo,
 } from "../Services/CourseManagement";
+import {
+  fetchCourseQuestions,
+  postAnswer,
+  fetchQuestionAnswers,
+} from "../Services/qaService";
 import DashboardLayout from "../Components/InstructorDashboard/DashboardLayout";
 import { Link } from "react-router-dom";
+import AddVideoModal from "./AddVideoModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 // Format seconds to hours:minutes:seconds
 const formatDuration = (seconds) => {
@@ -41,523 +45,6 @@ const formatDuration = (seconds) => {
   ]
     .filter(Boolean)
     .join(":");
-};
-
-// Add Video Modal Component
-const AddVideoModal = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  isSubmitting,
-  editMode = false,
-  initialData = {},
-}) => {
-  const [videoData, setVideoData] = useState({
-    title: "",
-    description: "",
-    videoUrl: "",
-    videoThumbnail: "",
-    duration: 0,
-  });
-
-  const [errors, setErrors] = useState({});
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [currentUploadType, setCurrentUploadType] = useState("");
-  const [videoPreview, setVideoPreview] = useState(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState(null);
-  const fileInputRefs = useRef({});
-
-  // Initialize with data if in edit mode
-  useEffect(() => {
-    if (editMode && initialData) {
-      setVideoData({
-        title: initialData.title || "",
-        description: initialData.description || "",
-        videoUrl: initialData.videoUrl || "",
-        videoThumbnail: initialData.videoThumbnail || "",
-        duration: initialData.duration || 0,
-      });
-
-      if (initialData.videoUrl) {
-        setVideoPreview({ url: initialData.videoUrl, name: "Current video" });
-      }
-      if (initialData.videoThumbnail) {
-        setThumbnailPreview({
-          url: initialData.videoThumbnail,
-          name: "Current thumbnail",
-        });
-      }
-    }
-  }, [editMode, initialData]);
-
-  // Simulated progress for uploads
-  const simulateProgress = () => {
-    setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + 5;
-      });
-    }, 100);
-    return () => clearInterval(interval);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setVideoData({ ...videoData, [name]: value });
-
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
-    }
-  };
-
-  const handleVideoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Create video preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setVideoPreview({ url: reader.result, name: file.name });
-    };
-    reader.readAsDataURL(file);
-
-    setUploading(true);
-    setCurrentUploadType("video");
-    const stopProgress = simulateProgress();
-
-    try {
-      const response = await uploadVideo(file);
-      // Extract the URL from the response object
-      const videoUrl = response.videoUrl || response;
-
-      setVideoData({
-        ...videoData,
-        videoUrl: videoUrl,
-      });
-      setUploadProgress(100);
-    } catch (err) {
-      setErrors({ ...errors, videoUrl: "Failed to upload video" });
-    } finally {
-      setTimeout(() => {
-        setUploading(false);
-        setCurrentUploadType("");
-        setUploadProgress(0);
-      }, 500);
-      stopProgress();
-    }
-  };
-
-  const handleThumbnailUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Create thumbnail preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setThumbnailPreview({ url: reader.result, name: file.name });
-    };
-    reader.readAsDataURL(file);
-
-    setUploading(true);
-    setCurrentUploadType("thumbnail");
-    const stopProgress = simulateProgress();
-
-    try {
-      const response = await uploadImage(file);
-      // Extract the URL from the response object
-      const imageUrl = response.imageUrl || response;
-
-      setVideoData({
-        ...videoData,
-        videoThumbnail: imageUrl,
-      });
-      setUploadProgress(100);
-    } catch (err) {
-      setErrors({ ...errors, videoThumbnail: "Failed to upload thumbnail" });
-    } finally {
-      setTimeout(() => {
-        setUploading(false);
-        setCurrentUploadType("");
-        setUploadProgress(0);
-      }, 500);
-      stopProgress();
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!videoData.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-
-    if (!videoData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-
-    if (!videoData.videoUrl.trim()) {
-      newErrors.videoUrl = "Video is required";
-    }
-
-    if (!videoData.duration || videoData.duration <= 0) {
-      newErrors.duration = "Valid duration is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      onSubmit(videoData);
-    }
-  };
-
-  // Progress bar component
-  const ProgressBar = ({ progress, type }) => (
-    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-      <div
-        className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-in-out"
-        style={{ width: `${progress}%` }}
-      ></div>
-      <p className="text-xs text-gray-500 mt-1">
-        {progress < 100
-          ? `Uploading ${type}... ${progress}%`
-          : `${type} uploaded successfully!`}
-      </p>
-    </div>
-  );
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div
-        className="bg-white rounded-lg shadow-md p-6 max-w-2xl w-full mx-4 animate-fadeIn overflow-y-auto max-h-[90vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-medium text-gray-900">
-            {editMode ? "Edit Video Lecture" : "Add New Video Lecture"}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 mb-6">
-            <div>
-              <label
-                htmlFor="title"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={videoData.title}
-                onChange={handleChange}
-                className={`w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  errors.title ? "border-red-500" : "border-gray-200"
-                }`}
-                placeholder="Enter video title"
-              />
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-500">{errors.title}</p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={videoData.description}
-                onChange={handleChange}
-                rows="3"
-                className={`w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  errors.description ? "border-red-500" : "border-gray-200"
-                }`}
-                placeholder="Enter video description"
-              ></textarea>
-              {errors.description && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.description}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Video File <span className="text-red-500">*</span>
-              </label>
-              <div className="mt-1">
-                {videoData.videoUrl ? (
-                  <div className="relative p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    {videoPreview && (
-                      <div className="mb-2">
-                        <video
-                          src={videoPreview.url}
-                          className="w-full h-24 object-cover rounded-md"
-                          controls
-                        />
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <FileVideo size={16} className="text-blue-500 mr-2" />
-                        <span className="text-sm truncate max-w-[150px]">
-                          {videoPreview?.name || "Video uploaded"}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setVideoData({ ...videoData, videoUrl: "" });
-                          setVideoPreview(null);
-                        }}
-                        className="ml-2 text-red-500 hover:text-red-700"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                    <input
-                      type="file"
-                      id="video-upload"
-                      accept="video/*"
-                      onChange={handleVideoUpload}
-                      className="hidden"
-                      ref={(el) => (fileInputRefs.current["video"] = el)}
-                    />
-                    <label
-                      htmlFor="video-upload"
-                      className="flex flex-col items-center justify-center cursor-pointer py-2"
-                    >
-                      <FileVideo className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-500">
-                        Click to upload video
-                      </span>
-                    </label>
-                  </div>
-                )}
-
-                {currentUploadType === "video" && uploading && (
-                  <ProgressBar progress={uploadProgress} type="video" />
-                )}
-                {errors.videoUrl && !uploading && (
-                  <p className="mt-1 text-sm text-red-500">{errors.videoUrl}</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Video Thumbnail
-              </label>
-              <div className="mt-1">
-                {videoData.videoThumbnail ? (
-                  <div className="relative p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    {thumbnailPreview && (
-                      <div className="mb-2">
-                        <img
-                          src={thumbnailPreview.url}
-                          alt="Video thumbnail"
-                          className="w-full h-24 object-cover rounded-md"
-                        />
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Image size={16} className="text-blue-500 mr-2" />
-                        <span className="text-sm truncate max-w-[150px]">
-                          {thumbnailPreview?.name || "Thumbnail uploaded"}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setVideoData({ ...videoData, videoThumbnail: "" });
-                          setThumbnailPreview(null);
-                        }}
-                        className="ml-2 text-red-500 hover:text-red-700"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                    <input
-                      type="file"
-                      id="thumbnail-upload"
-                      accept="image/*"
-                      onChange={handleThumbnailUpload}
-                      className="hidden"
-                      ref={(el) => (fileInputRefs.current["thumbnail"] = el)}
-                    />
-                    <label
-                      htmlFor="thumbnail-upload"
-                      className="flex flex-col items-center justify-center cursor-pointer py-2"
-                    >
-                      <Image className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-500">
-                        Click to upload thumbnail
-                      </span>
-                    </label>
-                  </div>
-                )}
-
-                {currentUploadType === "thumbnail" && uploading && (
-                  <ProgressBar progress={uploadProgress} type="thumbnail" />
-                )}
-                {errors.videoThumbnail && !uploading && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.videoThumbnail}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="duration"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Duration (in seconds) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                id="duration"
-                name="duration"
-                value={videoData.duration}
-                onChange={handleChange}
-                min="1"
-                className={`w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  errors.duration ? "border-red-500" : "border-gray-200"
-                }`}
-                placeholder="Enter duration in seconds"
-              />
-              {errors.duration && (
-                <p className="mt-1 text-sm text-red-500">{errors.duration}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50"
-              disabled={isSubmitting || uploading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-white bg-gray-900 rounded-md text-sm font-medium disabled:bg-gray-400"
-              disabled={isSubmitting || uploading}
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>
-                  {editMode ? "Updating..." : "Saving..."}
-                </>
-              ) : (
-                <>{editMode ? "Update Video" : "Add Video"}</>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-// Delete Confirmation Modal Component
-const DeleteConfirmationModal = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  videoTitle,
-  isDeleting,
-}) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div
-        className="bg-white rounded-lg shadow-md p-6 max-w-md w-full mx-4 animate-fadeIn"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Delete Video</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="mb-6">
-          <p className="text-gray-700 mb-2">
-            Are you sure you want to delete{" "}
-            <span className="font-medium">{videoTitle}</span>?
-          </p>
-          <p className="text-sm text-gray-500">
-            This action cannot be undone. The video will be permanently removed
-            from this course.
-          </p>
-        </div>
-
-        <div className="flex justify-end space-x-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-600 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50"
-            disabled={isDeleting}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 text-white bg-red-500 rounded-md text-sm font-medium hover:bg-red-600"
-            disabled={isDeleting}
-          >
-            {isDeleting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>
-                Deleting...
-              </>
-            ) : (
-              <>Delete Video</>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 const CourseDetailsPage = () => {
@@ -576,6 +63,108 @@ const CourseDetailsPage = () => {
   const [deleteError, setDeleteError] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [videoToEdit, setVideoToEdit] = useState(null);
+
+  const [questions, setQuestions] = useState([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionError, setQuestionError] = useState(null);
+  const [expandedQuestionId, setExpandedQuestionId] = useState(null);
+  const [answerText, setAnswerText] = useState("");
+  const [loadingAnswers, setLoadingAnswers] = useState(false);
+
+  // Fetch course details and videos on component mount
+  useEffect(() => {
+    const loadCourseData = async () => {
+      try {
+        setIsLoading(true);
+        const [courseData, videosData] = await Promise.all([
+          fetchCourseDetails(courseId),
+          fetchCourseVideos(courseId),
+        ]);
+
+        setCourse(courseData);
+        setVideos(videosData.videos || []);
+      } catch (err) {
+        setError(err.message || "Failed to load course data");
+        console.error("Error loading course data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCourseData();
+  }, [courseId]);
+
+  // Fetch questions for the course
+  useEffect(() => {
+    const loadQuestions = async () => {
+      if (!courseId) return;
+
+      try {
+        setLoadingQuestions(true);
+        setQuestionError(null);
+        const data = await fetchCourseQuestions(courseId);
+        setQuestions(data.questions || []);
+      } catch (err) {
+        setQuestionError(err.message || "Failed to load questions");
+        console.error("Error loading questions:", err);
+      } finally {
+        setLoadingQuestions(false);
+      }
+    };
+
+    loadQuestions();
+  }, [courseId]);
+
+  // Function to handle expanding question and loading answers
+  const handleExpandQuestion = async (questionId) => {
+    if (expandedQuestionId === questionId) {
+      setExpandedQuestionId(null); // Collapse if already expanded
+      return;
+    }
+
+    setExpandedQuestionId(questionId);
+    setLoadingAnswers(true);
+
+    try {
+      const answersData = await fetchQuestionAnswers(questionId);
+
+      // Update the questions state to include the fetched answers
+      setQuestions((prevQuestions) =>
+        prevQuestions.map((q) =>
+          q._id === questionId ? { ...q, answers: answersData.data || [] } : q
+        )
+      );
+    } catch (err) {
+      console.error("Error fetching answers:", err);
+      // Optionally show error to user
+    } finally {
+      setLoadingAnswers(false);
+    }
+  };
+
+  // Function to handle submitting an answer
+  const handleAnswerSubmit = async (questionId) => {
+    if (!answerText.trim()) return;
+
+    try {
+      await postAnswer(questionId, answerText);
+
+      // Refresh answers for this question
+      const answersData = await fetchQuestionAnswers(questionId);
+
+      // Update the questions state
+      setQuestions((prevQuestions) =>
+        prevQuestions.map((q) =>
+          q._id === questionId ? { ...q, answers: answersData.data || [] } : q
+        )
+      );
+
+      setAnswerText("");
+    } catch (err) {
+      console.error("Error submitting answer:", err);
+      alert(`Failed to submit answer: ${err.message}`);
+    }
+  };
 
   // Fetch course details and videos on component mount
   useEffect(() => {
@@ -777,7 +366,6 @@ const CourseDetailsPage = () => {
           </div>
         </div>
       </header>
-
       {/* Error Alert */}
       {(submitError || deleteError) && (
         <div className="max-w-6xl mx-auto px-4 py-3">
@@ -797,11 +385,11 @@ const CourseDetailsPage = () => {
       )}
 
       {/* Main Content */}
-      <div className=" mx-auto px-4 py-6  w-full ">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4  rounded-md ">
+      <div className="mx-auto px-4 py-6 w-full">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 rounded-md">
           {/* Course Details */}
-          <div className="lg:col-span-1 shadow-md ">
-            <div className=" p-4 rounded ">
+          <div className="lg:col-span-3 shadow-md">
+            <div className="p-4 rounded">
               <h2 className="text-lg font-medium mb-4 text-gray-900">
                 Course details
               </h2>
@@ -846,14 +434,14 @@ const CourseDetailsPage = () => {
           </div>
 
           {/* Video Lectures */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-6">
             <div className="bg-white rounded border border-gray-100 overflow-hidden shadow-md">
               <div className="flex justify-between items-center p-4 border-b border-gray-100">
                 <h2 className="text-lg font-medium text-gray-900">
                   Video Lectures
                 </h2>
                 <button
-                  className="bg-gray-900 text-white p-2 rounded text-sm  transition-colors flex justify-center items-center"
+                  className="bg-gray-900 text-white p-2 rounded text-sm transition-colors flex justify-center items-center"
                   onClick={openAddVideoModal}
                 >
                   <Plus size={20} className="inline mr-1" />
@@ -903,7 +491,6 @@ const CourseDetailsPage = () => {
                           </div>
 
                           {/* Video Information */}
-
                           <div className="p-3 flex-grow flex flex-col">
                             <div className="flex justify-between items-start">
                               <Link to={`/courses/${courseId}/player`}>
@@ -984,9 +571,119 @@ const CourseDetailsPage = () => {
               </div>
             </div>
           </div>
+
+          {/* Q&A Section */}
+          <div className="lg:col-span-3 shadow-md">
+            <div className="bg-white rounded-xl shadow-sm p-6 h-full">
+              <h3 className="text-lg font-bold mb-4 text-gray-900">
+                Have Questions?
+              </h3>
+
+              {loadingQuestions ? (
+                <div className="flex justify-center py-4">
+                  <Loader />
+                </div>
+              ) : questionError ? (
+                <div className="text-center py-4 text-red-500">
+                  <p>{questionError}</p>
+                  <button
+                    onClick={() => {
+                      fetchCourseQuestions(courseId)
+                        .then((data) => setQuestions(data.questions || []))
+                        .catch((err) => setQuestionError(err.message));
+                    }}
+                    className="mt-2 text-blue-500 hover:underline"
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {questions.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500">
+                      <p>No questions yet. Be the first to ask!</p>
+                    </div>
+                  ) : (
+                    questions.map((q) => (
+                      <div
+                        key={q._id}
+                        className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="font-medium text-gray-900">
+                            Q: {q.content}
+                          </div>
+                          <button
+                            onClick={() => handleExpandQuestion(q._id)}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            {expandedQuestionId === q._id ? "Hide" : "View"}
+                          </button>
+                        </div>
+
+                        {/* Show answers when question is expanded */}
+                        {expandedQuestionId === q._id && (
+                          <div className="mt-3 pl-4 border-l-2 border-gray-200">
+                            {loadingAnswers ? (
+                              <div className="py-2 flex justify-center">
+                                <Loader />
+                              </div>
+                            ) : (
+                              <>
+                                {/* Display existing answers */}
+                                {q.answers && q.answers.length > 0 ? (
+                                  <div className="space-y-2 mb-3">
+                                    {q.answers.map((answer, idx) => (
+                                      <div
+                                        key={answer._id || idx}
+                                        className="bg-gray-50 p-3 rounded-lg"
+                                      >
+                                        <p className="text-gray-700">
+                                          <span className="font-medium">
+                                            A:
+                                          </span>{" "}
+                                          {answer.content}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="text-gray-500 italic mb-3">
+                                    No answers yet
+                                  </div>
+                                )}
+
+                                {/* Answer input form */}
+                                <div className="flex mt-2">
+                                  <input
+                                    type="text"
+                                    value={answerText}
+                                    onChange={(e) =>
+                                      setAnswerText(e.target.value)
+                                    }
+                                    placeholder="Add an answer..."
+                                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500"
+                                  />
+                                  <button
+                                    onClick={() => handleAnswerSubmit(q._id)}
+                                    className="px-3 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700"
+                                  >
+                                    <Send size={16} />
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-
       {/* Add/Edit Video Modal */}
       <AddVideoModal
         isOpen={isAddModalOpen}
@@ -1000,7 +697,6 @@ const CourseDetailsPage = () => {
         editMode={editMode}
         initialData={videoToEdit}
       />
-
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={deleteModalOpen}
@@ -1011,6 +707,10 @@ const CourseDetailsPage = () => {
         onConfirm={confirmDeleteVideo}
         videoTitle={videoToDelete?.title || ""}
         isDeleting={isDeleting}
+        title="Delete Video"
+        message="Are you sure you want to delete"
+        itemName={videoToDelete?.title}
+        detailMessage="This video will be permanently removed from this course."
       />
     </DashboardLayout>
   );

@@ -224,9 +224,9 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
           </button>
 
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center bg-orange-600 p-1 rounded-md">
             <span className="text-2xl font-bold">
-              <span className="text-orange-400">L</span>exicon
+              <span className="text-black text-2xl">L</span>exicon
             </span>
           </div>
 
@@ -323,15 +323,16 @@ const InstructorDashboardSidebar = ({ onExpandChange }) => {
 
           {/* Logo and Title - only show on desktop */}
           {!isMobile && (
-            <div className="text-xl font-bold border-b border-white/20 h-16 flex items-center px-4">
-              <div className="flex items-center gap-2">
+            <div className="text-xl font-bold border-b border-white/20 h-16 flex items-center p-2">
+              <div className="flex items-center gap-2 ">
                 {isExpanded ? (
-                  <span className="whitespace-nowrap text-2xl">
-                    <span className="text-orange-400">L</span>exicon
+                  <span className="whitespace-nowrap text-2xl bg-orange-600 rounded-md p-2 ">
+                    <span className="text-black  font-bold">L</span>
+                    exicon
                   </span>
                 ) : (
-                  <div className="space-x-1">
-                    <span className="text-2xl text-orange-400">L</span>
+                  <div className="bg-orange-600 rounded-md p-2">
+                    <span className="text-2xl text-black">L</span>
                     <span className="text-2xl text-white">X</span>
                   </div>
                 )}

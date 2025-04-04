@@ -64,3 +64,22 @@ exports.getQuestionById = asyncHandler(async (req, res) => {
     data: question,
   });
 });
+exports.getRecentQuestions = asyncHandler(async (req, res) => {
+  // Calculate the date 2 days ago
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+  // Find questions created in the last 2 days
+  const recentQuestions = await Question.find({
+    createdAt: { $gte: twoDaysAgo },
+  })
+    .populate("userId", "name avatar")
+    .populate("courseId", "title instructor")
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    count: recentQuestions.length,
+    data: recentQuestions,
+  });
+});

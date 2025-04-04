@@ -155,7 +155,7 @@ const Navbar = () => {
               <Link to="/" className="flex items-center">
                 <div className="flex items-center">
                   <div className="relative">
-                    <span className="absolute inset-0 bg-orange-500 rounded-md "></span>
+                    <span className="absolute inset-0 bg-orange-500 rounded-md bg-gradient-to-r from-orange-600 via-orange-400 to-orange-700 "></span>
                     <h1 className="relative text-2xl font-bold text-white py-1 px-2 rounded-lg">
                       <span className="text-gray-900 text-2xl font-bold">
                         L
