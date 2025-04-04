@@ -24,6 +24,11 @@ import {
   postAnswer,
   fetchQuestionAnswers,
 } from "../../Services/qaService";
+
+import {
+  fetchCourseRatings,
+  rateCourse,
+} from "../../Services/ratingAndFeedback";
 import Navbar from "../../../Utils/Navbar";
 
 const formatDuration = (seconds) => {
@@ -40,7 +45,7 @@ const formatDuration = (seconds) => {
     .join(":");
 };
 
-const CourseDetailsPage = () => {
+const CourseDetails = () => {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [videos, setVideos] = useState([]);
@@ -55,12 +60,19 @@ const CourseDetailsPage = () => {
   const [questions, setQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [questionError, setQuestionError] = useState(null);
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [submittedRating, setSubmittedRating] = useState(false);
   const [expandedQuestionId, setExpandedQuestionId] = useState(null);
   const [answerText, setAnswerText] = useState("");
   const [loadingAnswers, setLoadingAnswers] = useState(false);
+
+  //rating features
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [submittedRating, setSubmittedRating] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [courseRatings, setCourseRatings] = useState(null);
+  const [ratingError, setRatingError] = useState(null);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [showFeedbackField, setShowFeedbackField] = useState(false);
 
   // Fetch course details and videos on component mount
   useEffect(() => {
@@ -118,6 +130,56 @@ const CourseDetailsPage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const loadRatings = async () => {
+      if (!courseId) return;
+
+      try {
+        const ratingsData = await fetchCourseRatings(courseId);
+        setCourseRatings(ratingsData);
+      } catch (err) {
+        console.error("Error loading course ratings:", err);
+        // Optionally set error state
+      }
+    };
+
+    loadRatings();
+  }, [courseId]);
+
+  const handleRatingSubmit = async () => {
+    if (rating === 0) return;
+
+    try {
+      setIsSubmittingRating(true);
+      setRatingError(null);
+
+      // Call the API to submit the rating
+      await rateCourse(courseId, rating, feedbackText);
+
+      // Update the display
+      setSubmittedRating(true);
+
+      // Refresh ratings data
+      const updatedRatings = await fetchCourseRatings(courseId);
+      setCourseRatings(updatedRatings);
+
+      // Reset after 3 seconds to allow rating again
+      setTimeout(() => {
+        setSubmittedRating(false);
+        setRating(0);
+        setFeedbackText("");
+        setShowFeedbackField(false);
+      }, 3000);
+    } catch (err) {
+      setRatingError(
+        err.message || "Failed to submit rating. Please try again."
+      );
+      console.error("Error submitting rating:", err);
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
   // Payment handlers
   const handlePayment = () => {
     // Simulate payment processing
@@ -146,15 +208,6 @@ const CourseDetailsPage = () => {
       // Show error to user
       alert(`Failed to submit question: ${err.message}`);
     }
-  };
-
-  // Rating handlers
-  const handleRatingSubmit = () => {
-    // Here you could implement a real API call to submit the rating
-    setSubmittedRating(true);
-    setTimeout(() => {
-      setSubmittedRating(false);
-    }, 2000);
   };
 
   const handleExpandQuestion = async (questionId) => {
@@ -209,7 +262,7 @@ const CourseDetailsPage = () => {
 
   const renderQASection = () => {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl shadow-md p-6">
         <h3 className="text-lg font-bold mb-4 text-gray-900">
           Have Questions?
         </h3>
@@ -379,7 +432,7 @@ const CourseDetailsPage = () => {
       <Navbar />
 
       {/* Course Header */}
-      <header className="bg-white border-b shadow-sm">
+      <header className="bg-white border-b shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="mb-4 md:mb-0">
@@ -412,7 +465,7 @@ const CourseDetailsPage = () => {
           {/* Left Column - Course Info and Features */}
           <div className="lg:col-span-2 space-y-8">
             {/* Course Thumbnail */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden ">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden ">
               {course.courseThumbnail ? (
                 <img
                   src={course.courseThumbnail}
@@ -427,7 +480,7 @@ const CourseDetailsPage = () => {
             </div>
 
             {/* Course Description */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               <h2 className="text-xl font-bold mb-4 text-gray-900">
                 About This Course
               </h2>
@@ -437,7 +490,7 @@ const CourseDetailsPage = () => {
             </div>
 
             {/* Curriculum */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900">Curriculum</h2>
                 <p className="text-sm text-gray-500 mt-1">
@@ -493,7 +546,7 @@ const CourseDetailsPage = () => {
           {/* Right Column - Student Features */}
           <div className="space-y-6">
             {/* Payment Summary (hardcoded) */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               <h3 className="text-lg font-bold mb-4 text-gray-900">
                 Course Summary
               </h3>
@@ -524,10 +577,11 @@ const CourseDetailsPage = () => {
             {renderQASection()}
 
             {/* Rating Section (hardcoded) */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
               <h3 className="text-lg font-bold mb-4 text-gray-900">
                 Rate This Course
               </h3>
+
               {submittedRating ? (
                 <div className="text-center py-4 text-green-600">
                   <Check size={32} className="mx-auto mb-2" />
@@ -535,14 +589,24 @@ const CourseDetailsPage = () => {
                 </div>
               ) : (
                 <>
+                  {ratingError && (
+                    <div className="text-center py-2 text-red-500 mb-4">
+                      <p>{ratingError}</p>
+                    </div>
+                  )}
+
                   <div className="flex justify-center mb-4">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => setRating(star)}
+                        onClick={() => {
+                          setRating(star);
+                          setShowFeedbackField(true);
+                        }}
                         className="text-2xl mx-1 focus:outline-none"
+                        disabled={isSubmittingRating}
                       >
                         {star <= (hoverRating || rating) ? (
                           <Star className="text-yellow-400 fill-current" />
@@ -552,18 +616,70 @@ const CourseDetailsPage = () => {
                       </button>
                     ))}
                   </div>
+
+                  {showFeedbackField && (
+                    <div className="mb-4">
+                      <label
+                        htmlFor="feedback"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Feedback (Optional)
+                      </label>
+                      <textarea
+                        id="feedback"
+                        rows="3"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Share your thoughts about this course..."
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        disabled={isSubmittingRating}
+                      ></textarea>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleRatingSubmit}
-                    disabled={rating === 0}
+                    disabled={rating === 0 || isSubmittingRating}
                     className={`w-full px-4 py-2 rounded-lg ${
-                      rating === 0
+                      rating === 0 || isSubmittingRating
                         ? "bg-gray-300 cursor-not-allowed"
                         : "bg-blue-600 hover:bg-blue-700 text-white"
                     }`}
                   >
-                    Submit Rating
+                    {isSubmittingRating ? (
+                      <div className="flex justify-center items-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Submitting...
+                      </div>
+                    ) : (
+                      "Submit Rating"
+                    )}
                   </button>
                 </>
+              )}
+
+              {/* Display course average rating if available */}
+              {courseRatings && courseRatings.averageRating && (
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">
+                      Average Rating:
+                    </span>
+                    <div className="flex items-center">
+                      <span className="mr-2 font-medium">
+                        {courseRatings.averageRating.toFixed(1)}
+                      </span>
+                      <Star
+                        size={16}
+                        className="text-yellow-400 fill-current"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Based on {courseRatings.totalRatings}{" "}
+                    {courseRatings.totalRatings === 1 ? "rating" : "ratings"}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -659,4 +775,4 @@ const CourseDetailsPage = () => {
   );
 };
 
-export default CourseDetailsPage;
+export default CourseDetails;

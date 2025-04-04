@@ -3,7 +3,7 @@ import config from "../../../../config";
 // Post a new question to a course
 export const postQuestion = async (courseId, questionContent) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/courses/${courseId}/questions`,
@@ -54,7 +54,7 @@ export const fetchCourseQuestions = async (courseId) => {
 // Post an answer to a question
 export const postAnswer = async (questionId, answerContent) => {
   try {
-    const token = localStorage.getItem("authToken") || "";
+    const token = localStorage.getItem("instructorAuthToken") || "";
 
     const response = await fetch(
       `${config.apiUrl}/api/questions/${questionId}/answers/instructor`,
@@ -97,6 +97,23 @@ export const fetchQuestionAnswers = async (questionId) => {
     return await response.json();
   } catch (error) {
     console.error("Error fetching question answers:", error);
+    throw error;
+  }
+};
+
+export const fetchCourseRecentQuestions = async () => {
+  try {
+    const response = await fetch(`${config.apiUrl}/api/questions/recent`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch course questions");
+    }
+
+    const responseData = await response.json();
+    return { questions: responseData.data || [] };
+  } catch (error) {
+    console.error("Error fetching course questions:", error);
     throw error;
   }
 };
