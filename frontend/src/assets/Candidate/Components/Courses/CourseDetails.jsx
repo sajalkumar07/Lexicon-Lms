@@ -262,7 +262,7 @@ const CourseDetails = () => {
 
   const renderQASection = () => {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6">
+      <div className="bg-white rounded-xl shadow-sm border  p-6">
         <h3 className="text-lg font-bold mb-4 text-gray-900">
           Have Questions?
         </h3>
@@ -432,7 +432,7 @@ const CourseDetails = () => {
       <Navbar />
 
       {/* Course Header */}
-      <header className="bg-white border-b shadow-md">
+      <header className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="mb-4 md:mb-0">
@@ -450,7 +450,7 @@ const CourseDetails = () => {
               </span>
               <button
                 onClick={() => setShowPaymentModal(true)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
               >
                 Enroll Now
               </button>
@@ -465,7 +465,7 @@ const CourseDetails = () => {
           {/* Left Column - Course Info and Features */}
           <div className="lg:col-span-2 space-y-8">
             {/* Course Thumbnail */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden ">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden ">
               {course.courseThumbnail ? (
                 <img
                   src={course.courseThumbnail}
@@ -480,7 +480,7 @@ const CourseDetails = () => {
             </div>
 
             {/* Course Description */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 border">
               <h2 className="text-xl font-bold mb-4 text-gray-900">
                 About This Course
               </h2>
@@ -490,7 +490,7 @@ const CourseDetails = () => {
             </div>
 
             {/* Curriculum */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900">Curriculum</h2>
                 <p className="text-sm text-gray-500 mt-1">
@@ -546,7 +546,7 @@ const CourseDetails = () => {
           {/* Right Column - Student Features */}
           <div className="space-y-6">
             {/* Payment Summary (hardcoded) */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white rounded-xl shadow-sm  border p-6">
               <h3 className="text-lg font-bold mb-4 text-gray-900">
                 Course Summary
               </h3>
@@ -577,7 +577,7 @@ const CourseDetails = () => {
             {renderQASection()}
 
             {/* Rating Section (hardcoded) */}
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 border  ">
               <h3 className="text-lg font-bold mb-4 text-gray-900">
                 Rate This Course
               </h3>
@@ -662,9 +662,7 @@ const CourseDetails = () => {
               {courseRatings && courseRatings.averageRating && (
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                      Average Rating:
-                    </span>
+                    <span className="text-sm text-gray-600">Avg Rating:</span>
                     <div className="flex items-center">
                       <span className="mr-2 font-medium">
                         {courseRatings.averageRating.toFixed(1)}
