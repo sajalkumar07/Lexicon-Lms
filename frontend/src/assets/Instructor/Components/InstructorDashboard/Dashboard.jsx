@@ -27,6 +27,7 @@ const InstructorDashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [instructorId, setInstructorId] = useState(null); // This should be dynamic, get from auth context
   const [expandedCourse, setExpandedCourse] = useState(null);
+  const [showAllActivity, setShowAllActivity] = useState(false);
 
   useEffect(() => {
     // Get instructor data from localStorage
@@ -384,7 +385,7 @@ const InstructorDashboard = () => {
       <div className="max-w-7xl mx-auto p-1">
         <div className="mb-6">
           <h1 className="text-2xl font-medium text-gray-900 mb-1">
-            Instructor Dashboard
+            Your Engagement
           </h1>
           <p className="text-gray-500">
             Welcome back! Here's an overview of your teaching performance.
@@ -540,12 +541,15 @@ const InstructorDashboard = () => {
 
                   <div className="max-h-96 overflow-y-auto">
                     {recentActivity.length > 0 ? (
-                      recentActivity.map((activity) => (
-                        <NotificationItem
-                          key={activity.id}
-                          notification={activity}
-                        />
-                      ))
+                      // Show only 5 items unless showAllActivity is true
+                      recentActivity
+                        .slice(0, showAllActivity ? recentActivity.length : 5)
+                        .map((activity) => (
+                          <NotificationItem
+                            key={activity.id}
+                            notification={activity}
+                          />
+                        ))
                     ) : (
                       <div className="p-4 text-center text-gray-500">
                         <Bell
@@ -558,8 +562,11 @@ const InstructorDashboard = () => {
                   </div>
 
                   <div className="p-3 border-t border-gray-100 text-center">
-                    <button className="text-sm text-blue-600 hover:text-blue-800">
-                      View all activity
+                    <button
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                      onClick={() => setShowAllActivity(!showAllActivity)}
+                    >
+                      {showAllActivity ? "Show less" : "View all activity"}
                     </button>
                   </div>
                 </div>
