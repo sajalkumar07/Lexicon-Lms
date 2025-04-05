@@ -1,6 +1,6 @@
 import config from "../../../../config";
 
-export const loginUser = async ({ email, password }) => {
+export const loginInstructor = async ({ email, password }) => {
   try {
     console.log("Login attempt:", { email, password }); // Log the email and password sent
 
@@ -27,7 +27,7 @@ export const loginUser = async ({ email, password }) => {
   }
 };
 
-export const registerUser = async ({
+export const registerInstructor = async ({
   firstName,
   lastName,
   email,
