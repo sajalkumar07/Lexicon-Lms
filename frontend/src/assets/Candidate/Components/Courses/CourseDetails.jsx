@@ -31,6 +31,14 @@ import {
 } from "../../Services/ratingAndFeedback";
 import Navbar from "../../../Utils/Navbar";
 import PaymentReceiptModal from "./PaymentReceiptModal";
+import {
+  loadRazorpayScript,
+  createOrder,
+  verifyPayment,
+  recordSuccessfulPayment,
+  initiateRazorpayPayment,
+} from "../../Services/paymentService";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 const formatDuration = (seconds) => {
@@ -150,16 +158,16 @@ const CourseDetails = () => {
     loadRatings();
   }, [courseId]);
 
-  // Payment functions
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
+  // // Payment functions
+  // const loadRazorpayScript = () => {
+  //   return new Promise((resolve) => {
+  //     const script = document.createElement("script");
+  //     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+  //     script.onload = () => resolve(true);
+  //     script.onerror = () => resolve(false);
+  //     document.body.appendChild(script);
+  //   });
+  // };
 
   const handlePayment = async () => {
     if (!course) return;
@@ -178,26 +186,7 @@ const CourseDetails = () => {
       const finalPrice = course.price - 200; // Apply discount of 200
       const amountInPaise = finalPrice * 100; // Convert to paise
 
-      const createOrderRes = await fetch(
-        "http://localhost:8080/api/payment/create-order",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: amountInPaise,
-            currency: "INR",
-            receipt: `${courseId}`,
-          }),
-        }
-      );
-
-      const orderData = await createOrderRes.json();
-      if (!orderData.success) {
-        alert("Order creation failed");
-        setProcessingPayment(false);
-        return;
-      }
-
+      const orderData = await createOrder(amountInPaise, "INR", `${courseId}`);
       const { orderId, amount, currency } = orderData;
 
       const options = {
@@ -209,28 +198,11 @@ const CourseDetails = () => {
         order_id: orderId,
         handler: async function (response) {
           try {
-            const verifyRes = await fetch(
-              "http://localhost:8080/api/payment/verify-payment",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(response),
-              }
-            );
-
-            const verifyData = await verifyRes.json();
+            const verifyData = await verifyPayment(response);
 
             if (verifyData.success) {
               // Record successful payment
-              await fetch("http://localhost:8080/api/payment/success-payment", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ...response,
-                  courseId,
-                  amount: finalPrice,
-                }),
-              });
+              await recordSuccessfulPayment(response, courseId, finalPrice);
 
               setPaymentDetails({
                 orderId: response.razorpay_order_id,
@@ -263,15 +235,13 @@ const CourseDetails = () => {
         },
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      initiateRazorpayPayment(options);
     } catch (error) {
       console.error("Payment error:", error);
       alert("Something went wrong with the payment. Please try again.");
       setProcessingPayment(false);
     }
   };
-
   const handleRatingSubmit = async () => {
     if (rating === 0) return;
 
