@@ -37,6 +37,7 @@ import {
   verifyPayment,
   recordSuccessfulPayment,
   initiateRazorpayPayment,
+  checkIfPurchased,
 } from "../../Services/paymentService";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -175,6 +176,18 @@ const CourseDetails = () => {
     setProcessingPayment(true);
 
     try {
+      // Get auth authToken from localStorage
+      const authToken = localStorage.getItem("authToken");
+      // Get user data from localStorage and parse it to access userId
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      const userId = userData?.userId;
+
+      if (!authToken || !userId) {
+        alert("You need to be logged in to make a purchase");
+        setProcessingPayment(false);
+        return;
+      }
+
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         alert("Failed to load Razorpay script");
@@ -184,9 +197,16 @@ const CourseDetails = () => {
 
       // Calculate final price (with discount if applicable)
       const finalPrice = course.price - 200; // Apply discount of 200
-      const amountInPaise = finalPrice * 100; // Convert to paise
+      const amountInPaise = finalPrice; // Convert to paise
 
-      const orderData = await createOrder(amountInPaise, "INR", `${courseId}`);
+      const orderData = await createOrder(
+        amountInPaise,
+        "INR",
+        courseId,
+        userId,
+        authToken
+      );
+
       const { orderId, amount, currency } = orderData;
 
       const options = {
@@ -198,11 +218,25 @@ const CourseDetails = () => {
         order_id: orderId,
         handler: async function (response) {
           try {
-            const verifyData = await verifyPayment(response);
+            // Add courseId and userId to the response object
+            // before sending for verification
+            const verifyData = await verifyPayment(
+              {
+                ...response,
+                courseId,
+                userId,
+                amount: amountInPaise,
+              },
+              authToken
+            );
 
             if (verifyData.success) {
               // Record successful payment
-              await recordSuccessfulPayment(response, courseId, finalPrice);
+              await recordSuccessfulPayment(
+                response.razorpay_payment_id,
+                courseId,
+                authToken
+              );
 
               setPaymentDetails({
                 orderId: response.razorpay_order_id,
@@ -211,6 +245,9 @@ const CourseDetails = () => {
                 courseName: course.title,
                 amount: finalPrice,
               });
+
+              // Optionally check purchase status
+              await checkIfPurchased(userId, courseId, authToken);
             } else {
               alert("❌ Payment verification failed.");
             }
@@ -222,7 +259,7 @@ const CourseDetails = () => {
           }
         },
         prefill: {
-          name: "Student",
+          name: userData?.name,
           email: "",
         },
         theme: {

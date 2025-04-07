@@ -105,6 +105,7 @@ const PaymentReceiptModal = ({ paymentDetails, setPaymentDetails }) => {
                 >
                   <Copy size={14} />
                 </button>
+                {/* <strong>Signature:</strong> {paymentDetails.signature} */}
               </div>
             </div>
 

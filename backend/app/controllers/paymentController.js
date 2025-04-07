@@ -1,5 +1,6 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const Purchase = require("../models/PaymentSchema");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -7,12 +8,24 @@ const razorpay = new Razorpay({
 });
 
 exports.createOrder = async (req, res) => {
-  const { amount, currency, receipt } = req.body;
+  const { amount, currency, receipt, courseId, userId } = req.body;
+
+  // Validate required fields
+  if (!amount || !courseId || !userId) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing required fields (amount, courseId, userId)",
+    });
+  }
 
   const options = {
-    amount: amount, // convert to paisa
+    amount: amount, // amount in smallest currency unit
     currency: currency || "INR",
     receipt: receipt || `receipt_${Date.now()}`,
+    notes: {
+      courseId: courseId,
+      userId: userId,
+    },
   };
 
   try {
@@ -28,9 +41,30 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-exports.verifyPayment = (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-    req.body;
+exports.verifyPayment = async (req, res) => {
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+    courseId,
+    userId,
+    amount,
+  } = req.body;
+
+  // Validate required fields
+  if (
+    !razorpay_order_id ||
+    !razorpay_payment_id ||
+    !razorpay_signature ||
+    !courseId ||
+    !userId ||
+    !amount
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required payment verification fields",
+    });
+  }
 
   const sign = razorpay_order_id + "|" + razorpay_payment_id;
 
@@ -40,16 +74,131 @@ exports.verifyPayment = (req, res) => {
     .digest("hex");
 
   if (expectedSignature === razorpay_signature) {
-    return res
-      .status(200)
-      .json({ success: true, message: "Payment verified successfully" });
+    try {
+      // Create purchase record in database
+      const newPurchase = new Purchase({
+        userId: userId,
+        courseId: courseId,
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        amount: amount,
+        status: "completed",
+        paymentDetails: {
+          signature: razorpay_signature,
+          verifiedAt: new Date(),
+        },
+      });
+
+      await newPurchase.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Payment verified and purchase recorded successfully",
+        purchaseId: newPurchase._id,
+      });
+    } catch (error) {
+      console.error("Error creating purchase record:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Payment verified but failed to save purchase record",
+        error: error.message,
+      });
+    }
   } else {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid signature" });
+    return res.status(400).json({
+      success: false,
+      message: "Invalid signature",
+    });
   }
 };
+
 exports.successCallback = async (req, res) => {
   console.log("✅ Payment success callback:", req.body.payment_Id);
   res.json({ success: true, message: "Payment confirmed by frontend" });
+};
+
+exports.checkCoursePurchase = async (req, res) => {
+  try {
+    const { userId, courseId } = req.params;
+
+    // Validate inputs
+    if (!userId || !courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID and Course ID are required",
+      });
+    }
+
+    // Find a purchase record that matches both userId and courseId
+    const purchase = await Purchase.findOne({
+      userId: userId,
+      courseId: courseId,
+      status: "completed", // Ensure payment was completed successfully
+    });
+
+    return res.status(200).json({
+      success: true,
+      hasPurchased: !!purchase, // Convert to boolean
+      purchaseDetails: purchase
+        ? {
+            purchaseDate: purchase.createdAt,
+            orderId: purchase.orderId,
+          }
+        : null,
+    });
+  } catch (error) {
+    console.error("Error checking course purchase:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while checking purchase status",
+      error: error.message,
+    });
+  }
+};
+
+exports.getUserPurchases = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Validate input
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    // Find all purchases for this user
+    const purchases = await Purchase.find({
+      userId: userId,
+      status: "completed", // Only include completed purchases
+    }).populate(
+      "courseId",
+      "title description courseThumbnail category difficulty price"
+    );
+    // The populate method fetches related course details from the Course model
+
+    return res.status(200).json({
+      success: true,
+      count: purchases.length,
+      purchases: purchases.map((purchase) => ({
+        courseId: purchase.courseId._id,
+        title: purchase.courseId.title,
+        description: purchase.courseId.description,
+        thumbnail: purchase.courseId.courseThumbnail,
+        category: purchase.courseId.category,
+        difficulty: purchase.courseId.difficulty,
+        purchaseDate: purchase.createdAt,
+        orderId: purchase.orderId,
+        amount: purchase.amount,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching user purchases:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching purchase history",
+      error: error.message,
+    });
+  }
 };

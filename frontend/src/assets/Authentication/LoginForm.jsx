@@ -35,6 +35,7 @@ const LoginForm = ({
 
       // Construct the user data object
       const userData = {
+        userId: data.id,
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
