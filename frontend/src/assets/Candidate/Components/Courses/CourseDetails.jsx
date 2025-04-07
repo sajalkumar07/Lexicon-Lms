@@ -30,6 +30,8 @@ import {
   rateCourse,
 } from "../../Services/ratingAndFeedback";
 import Navbar from "../../../Utils/Navbar";
+import PaymentReceiptModal from "./PaymentReceiptModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 const formatDuration = (seconds) => {
   const hours = Math.floor(seconds / 3600);
@@ -54,8 +56,6 @@ const CourseDetails = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
 
   // Student features
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [questionText, setQuestionText] = useState("");
   const [questions, setQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
@@ -63,6 +63,10 @@ const CourseDetails = () => {
   const [expandedQuestionId, setExpandedQuestionId] = useState(null);
   const [answerText, setAnswerText] = useState("");
   const [loadingAnswers, setLoadingAnswers] = useState(false);
+
+  // Payment features
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   //rating features
   const [rating, setRating] = useState(0);
@@ -146,6 +150,128 @@ const CourseDetails = () => {
     loadRatings();
   }, [courseId]);
 
+  // Payment functions
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayment = async () => {
+    if (!course) return;
+
+    setProcessingPayment(true);
+
+    try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        alert("Failed to load Razorpay script");
+        setProcessingPayment(false);
+        return;
+      }
+
+      // Calculate final price (with discount if applicable)
+      const finalPrice = course.price - 200; // Apply discount of 200
+      const amountInPaise = finalPrice * 100; // Convert to paise
+
+      const createOrderRes = await fetch(
+        "http://localhost:8080/api/payment/create-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: amountInPaise,
+            currency: "INR",
+            receipt: `${courseId}`,
+          }),
+        }
+      );
+
+      const orderData = await createOrderRes.json();
+      if (!orderData.success) {
+        alert("Order creation failed");
+        setProcessingPayment(false);
+        return;
+      }
+
+      const { orderId, amount, currency } = orderData;
+
+      const options = {
+        key: "rzp_test_29tDaxOsVy66E9",
+        amount,
+        currency,
+        name: "Course Enrollment",
+        description: `Enrollment for ${course.title}`,
+        order_id: orderId,
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch(
+              "http://localhost:8080/api/payment/verify-payment",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(response),
+              }
+            );
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              // Record successful payment
+              await fetch("http://localhost:8080/api/payment/success-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ...response,
+                  courseId,
+                  amount: finalPrice,
+                }),
+              });
+
+              setPaymentDetails({
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                courseName: course.title,
+                amount: finalPrice,
+              });
+            } else {
+              alert("❌ Payment verification failed.");
+            }
+          } catch (error) {
+            console.error("Payment verification error:", error);
+            alert("Payment verification failed. Please contact support.");
+          } finally {
+            setProcessingPayment(false);
+          }
+        },
+        prefill: {
+          name: "Student",
+          email: "",
+        },
+        theme: {
+          color: "#3B82F6", // Blue color matching the UI
+        },
+        modal: {
+          ondismiss: function () {
+            setProcessingPayment(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Payment error:", error);
+      alert("Something went wrong with the payment. Please try again.");
+      setProcessingPayment(false);
+    }
+  };
+
   const handleRatingSubmit = async () => {
     if (rating === 0) return;
 
@@ -178,18 +304,6 @@ const CourseDetails = () => {
     } finally {
       setIsSubmittingRating(false);
     }
-  };
-
-  // Payment handlers
-  const handlePayment = () => {
-    // Simulate payment processing
-    setTimeout(() => {
-      setPaymentSuccess(true);
-      setTimeout(() => {
-        setShowPaymentModal(false);
-        setPaymentSuccess(false);
-      }, 2000);
-    }, 1500);
   };
 
   // Question handlers
@@ -262,7 +376,7 @@ const CourseDetails = () => {
 
   const renderQASection = () => {
     return (
-      <div className="bg-white rounded-xl shadow-sm border  p-6">
+      <div className="bg-white rounded-xl shadow-sm border p-6">
         <h3 className="text-lg font-bold mb-4 text-gray-900">
           Have Questions?
         </h3>
@@ -449,10 +563,23 @@ const CourseDetails = () => {
                 ₹{course.price}
               </span>
               <button
-                onClick={() => setShowPaymentModal(true)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                className={`px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center ${
+                  processingPayment ? "opacity-75 cursor-not-allowed" : ""
+                }`}
+                onClick={handlePayment}
+                disabled={processingPayment}
               >
-                Enroll Now
+                {processingPayment ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard size={18} className="mr-2" />
+                    Enroll Now
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -545,8 +672,8 @@ const CourseDetails = () => {
 
           {/* Right Column - Student Features */}
           <div className="space-y-6">
-            {/* Payment Summary (hardcoded) */}
-            <div className="bg-white rounded-xl shadow-sm  border p-6">
+            {/* Payment Summary */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
               <h3 className="text-lg font-bold mb-4 text-gray-900">
                 Course Summary
               </h3>
@@ -565,10 +692,23 @@ const CourseDetails = () => {
                   <span>₹{course.price - 200}</span>
                 </div>
                 <button
-                  onClick={() => setShowPaymentModal(true)}
-                  className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className={`w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center ${
+                    processingPayment ? "opacity-75 cursor-not-allowed" : ""
+                  }`}
+                  onClick={handlePayment}
+                  disabled={processingPayment}
                 >
-                  Enroll Now
+                  {processingPayment ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={18} className="mr-2" />
+                      Pay Now
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -576,8 +716,8 @@ const CourseDetails = () => {
             {/* Q&A Section with API Integration */}
             {renderQASection()}
 
-            {/* Rating Section (hardcoded) */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border  ">
+            {/* Rating Section */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border">
               <h3 className="text-lg font-bold mb-4 text-gray-900">
                 Rate This Course
               </h3>
@@ -683,92 +823,14 @@ const CourseDetails = () => {
           </div>
         </div>
       </main>
-
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            {paymentSuccess ? (
-              <div className="text-center py-6">
-                <Check size={48} className="mx-auto text-green-500 mb-4" />
-                <h3 className="text-xl font-bold mb-2">Payment Successful!</h3>
-                <p className="text-gray-600 mb-6">
-                  You now have full access to the course.
-                </p>
-                <button
-                  onClick={() => setShowPaymentModal(false)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Start Learning
-                </button>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-xl font-bold mb-4">
-                  Complete Your Enrollment
-                </h3>
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Course:</span>
-                    <span className="font-medium">{course.title}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Amount:</span>
-                    <span className="font-medium">₹{course.price - 200}</span>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="font-medium mb-2">Payment Method</h4>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-3 p-3 border border-gray-300 rounded-lg">
-                      <input
-                        type="radio"
-                        name="payment"
-                        className="form-radio text-blue-600"
-                        defaultChecked
-                      />
-                      <CreditCard size={20} className="text-gray-700" />
-                      <span>Credit/Debit Card</span>
-                    </label>
-                    <label className="flex items-center space-x-3 p-3 border border-gray-300 rounded-lg">
-                      <input
-                        type="radio"
-                        name="payment"
-                        className="form-radio text-blue-600"
-                      />
-                      <span>UPI</span>
-                    </label>
-                    <label className="flex items-center space-x-3 p-3 border border-gray-300 rounded-lg">
-                      <input
-                        type="radio"
-                        name="payment"
-                        className="form-radio text-blue-600"
-                      />
-                      <span>Net Banking</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => setShowPaymentModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handlePayment}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Pay ₹{course.price - 200}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {paymentDetails && (
+          <PaymentReceiptModal
+            paymentDetails={paymentDetails}
+            setPaymentDetails={setPaymentDetails}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

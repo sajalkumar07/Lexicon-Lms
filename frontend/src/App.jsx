@@ -13,6 +13,7 @@ import CustomVideoPlayer from "./assets/Instructor/DashboardComponents/CustomVid
 import Profile from "./assets/Candidate/Components/CandidateProfile/Profile";
 import Setting from "./assets/Candidate/Components/CandidateProfile/Setting";
 import CourseDetailsCandidate from "./assets/Candidate/Components/Courses/CourseDetails";
+import Test from "./assets/Candidate/test";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           path="/candidate/courses/:courseId"
           element={<CourseDetailsCandidate />}
         />
+        <Route path="/test" element={<Test />} />
       </Routes>
     </Router>
   );

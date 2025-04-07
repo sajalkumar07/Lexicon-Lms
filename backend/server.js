@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const Razorpay = require("razorpay");
 const authRoutes = require("./app/routes/auth");
 const instructorAuth = require("./app/routes/instructorAuth");
 const courseRoutes = require("./app/routes/coursesRoutes");
@@ -13,6 +14,7 @@ const answerRoutes = require("./app/routes/answerRoutes");
 const globalQuestionRoutes = require("./app/routes/globalQuestionRoutes");
 const ratingCount = require("./app/routes/ratingRoutes");
 const getInstructorRatings = require("./app/routes/ratingRoutes");
+const paymentRoutes = require("./app/routes/paymentRoutes");
 
 dotenv.config();
 const app = express();
@@ -35,6 +37,7 @@ app.use("/api/questions/:questionId/answers", answerRoutes);
 app.use("/api/questions", globalQuestionRoutes);
 app.use("/api/courses/:courseId/ratings", ratingCount);
 app.use("/api/instructors", getInstructorRatings);
+app.use("/api/payment", paymentRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
