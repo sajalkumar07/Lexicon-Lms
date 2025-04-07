@@ -172,26 +172,46 @@ exports.getUserPurchases = async (req, res) => {
     const purchases = await Purchase.find({
       userId: userId,
       status: "completed", // Only include completed purchases
-    }).populate(
-      "courseId",
-      "title description courseThumbnail category difficulty price"
-    );
-    // The populate method fetches related course details from the Course model
+    }).populate({
+      path: "courseId",
+      populate: {
+        path: "instructor",
+        select: "firstName lastName email",
+      },
+    });
+
+    // Map and format the response to match getCourses format
+    const purchasedCourses = purchases.map((purchase) => {
+      const course = purchase.courseId;
+      return {
+        _id: course._id,
+        title: course.title,
+        category: course.category,
+        price: course.price,
+        description: course.description,
+        difficulty: course.difficulty,
+        instructor: {
+          _id: course.instructor._id,
+          firstName: course.instructor.firstName,
+          lastName: course.instructor.lastName,
+          email: course.instructor.email,
+        },
+        courseThumbnail: course.courseThumbnail,
+        videos: course.videos || [],
+        totalDuration: course.totalDuration || 0,
+        totalVideos: course.videos ? course.videos.length : 0,
+        rating: course.rating || 0,
+        students: course.students || 0,
+        purchaseDate: purchase.createdAt,
+        orderId: purchase.orderId,
+        purchaseAmount: purchase.amount,
+      };
+    });
 
     return res.status(200).json({
       success: true,
-      count: purchases.length,
-      purchases: purchases.map((purchase) => ({
-        courseId: purchase.courseId._id,
-        title: purchase.courseId.title,
-        description: purchase.courseId.description,
-        thumbnail: purchase.courseId.courseThumbnail,
-        category: purchase.courseId.category,
-        difficulty: purchase.courseId.difficulty,
-        purchaseDate: purchase.createdAt,
-        orderId: purchase.orderId,
-        amount: purchase.amount,
-      })),
+      count: purchasedCourses.length,
+      courses: purchasedCourses,
     });
   } catch (error) {
     console.error("Error fetching user purchases:", error);

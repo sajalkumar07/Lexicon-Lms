@@ -63,6 +63,7 @@ const CourseDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [isPurchased, setIsPurchased] = useState(false);
 
   // Student features
   const [questionText, setQuestionText] = useState("");
@@ -87,11 +88,17 @@ const CourseDetails = () => {
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [showFeedbackField, setShowFeedbackField] = useState(false);
 
-  // Fetch course details and videos on component mount
+  // Fetch course details, videos, and check purchase status on component mount
   useEffect(() => {
     const loadCourseData = async () => {
       try {
         setIsLoading(true);
+
+        // Get auth token and user data from localStorage
+        const authToken = localStorage.getItem("authToken");
+        const userData = JSON.parse(localStorage.getItem("userData"));
+        const userId = userData?.userId;
+
         const [courseData, videosData] = await Promise.all([
           fetchCourseDetails(courseId),
           fetchCourseVideos(courseId),
@@ -99,6 +106,38 @@ const CourseDetails = () => {
 
         setCourse(courseData);
         setVideos(videosData.videos || []);
+
+        // Check localStorage for purchase status
+        const localPurchaseStatus = localStorage.getItem(
+          `course_purchased_${courseId}`
+        );
+        if (localPurchaseStatus === "true") {
+          setIsPurchased(true);
+          return; // Skip API call if already purchased according to localStorage
+        }
+
+        // Only check API if not already marked as purchased in localStorage
+        if (authToken && userId) {
+          try {
+            const purchaseStatus = await checkIfPurchased(
+              userId,
+              courseId,
+              authToken
+            );
+            console.log("Purchase status response:", purchaseStatus);
+
+            if (purchaseStatus.isPurchased) {
+              localStorage.setItem(`course_purchased_${courseId}`, "true");
+              setIsPurchased(true);
+            } else {
+              localStorage.setItem(`course_purchased_${courseId}`, "false");
+              setIsPurchased(false);
+            }
+          } catch (purchaseErr) {
+            console.error("Error checking purchase status:", purchaseErr);
+            // Fallback to localStorage if API fails
+          }
+        }
       } catch (err) {
         setError(err.message || "Failed to load course data");
         console.error("Error loading course data:", err);
@@ -159,19 +198,8 @@ const CourseDetails = () => {
     loadRatings();
   }, [courseId]);
 
-  // // Payment functions
-  // const loadRazorpayScript = () => {
-  //   return new Promise((resolve) => {
-  //     const script = document.createElement("script");
-  //     script.src = "https://checkout.razorpay.com/v1/checkout.js";
-  //     script.onload = () => resolve(true);
-  //     script.onerror = () => resolve(false);
-  //     document.body.appendChild(script);
-  //   });
-  // };
-
   const handlePayment = async () => {
-    if (!course) return;
+    if (!course || isPurchased) return;
 
     setProcessingPayment(true);
 
@@ -197,7 +225,7 @@ const CourseDetails = () => {
 
       // Calculate final price (with discount if applicable)
       const finalPrice = course.price - 200; // Apply discount of 200
-      const amountInPaise = finalPrice; // Convert to paise
+      const amountInPaise = finalPrice * 100; // Convert to paise
 
       const orderData = await createOrder(
         amountInPaise,
@@ -246,8 +274,8 @@ const CourseDetails = () => {
                 amount: finalPrice,
               });
 
-              // Optionally check purchase status
-              await checkIfPurchased(userId, courseId, authToken);
+              localStorage.setItem(`course_purchased_${courseId}`, "true");
+              setIsPurchased(true);
             } else {
               alert("❌ Payment verification failed.");
             }
@@ -279,6 +307,7 @@ const CourseDetails = () => {
       setProcessingPayment(false);
     }
   };
+
   const handleRatingSubmit = async () => {
     if (rating === 0) return;
 
@@ -569,25 +598,35 @@ const CourseDetails = () => {
               <span className="text-2xl font-bold text-gray-900">
                 ₹{course.price}
               </span>
-              <button
-                className={`px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center ${
-                  processingPayment ? "opacity-75 cursor-not-allowed" : ""
-                }`}
-                onClick={handlePayment}
-                disabled={processingPayment}
-              >
-                {processingPayment ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard size={18} className="mr-2" />
-                    Enroll Now
-                  </>
-                )}
-              </button>
+              {isPurchased ? (
+                <button
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-sm flex items-center cursor-default"
+                  disabled
+                >
+                  <Check size={18} className="mr-2" />
+                  Already Purchased
+                </button>
+              ) : (
+                <button
+                  className={`px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center ${
+                    processingPayment ? "opacity-75 cursor-not-allowed" : ""
+                  }`}
+                  onClick={handlePayment}
+                  disabled={processingPayment}
+                >
+                  {processingPayment ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={18} className="mr-2" />
+                      Enroll Now
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -698,25 +737,32 @@ const CourseDetails = () => {
                   <span>Total:</span>
                   <span>₹{course.price - 200}</span>
                 </div>
-                <button
-                  className={`w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center ${
-                    processingPayment ? "opacity-75 cursor-not-allowed" : ""
-                  }`}
-                  onClick={handlePayment}
-                  disabled={processingPayment}
-                >
-                  {processingPayment ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard size={18} className="mr-2" />
-                      Pay Now
-                    </>
-                  )}
-                </button>
+                {isPurchased ? (
+                  <div className="w-full mt-4 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center">
+                    <Check size={18} className="mr-2" />
+                    Already Purchased
+                  </div>
+                ) : (
+                  <button
+                    className={`w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center ${
+                      processingPayment ? "opacity-75 cursor-not-allowed" : ""
+                    }`}
+                    onClick={handlePayment}
+                    disabled={processingPayment}
+                  >
+                    {processingPayment ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard size={18} className="mr-2" />
+                        Pay Now
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 

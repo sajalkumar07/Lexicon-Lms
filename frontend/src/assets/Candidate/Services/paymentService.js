@@ -136,7 +136,16 @@ export const getUserPurchases = async (userId, token) => {
     );
 
     const data = await response.json();
-    return data;
+
+    if (!data.success) {
+      throw new Error(data.message || "Failed to fetch user purchases");
+    }
+
+    return {
+      success: data.success,
+      count: data.count,
+      courses: data.courses,
+    };
   } catch (error) {
     console.error("Error fetching user purchases:", error);
     throw error;

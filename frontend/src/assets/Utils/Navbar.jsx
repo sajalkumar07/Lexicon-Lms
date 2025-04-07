@@ -95,7 +95,7 @@ const Navbar = () => {
     setIsLoggingOut(true);
     try {
       await logoutUser();
-      localStorage.removeItem("userData");
+      localStorage.clear();
       setIsLoggedIn(false);
       setUser(null);
       setShowProfileMenu(false);

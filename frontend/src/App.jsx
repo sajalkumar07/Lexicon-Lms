@@ -14,6 +14,7 @@ import Profile from "./assets/Candidate/Components/CandidateProfile/Profile";
 import Setting from "./assets/Candidate/Components/CandidateProfile/Setting";
 import CourseDetailsCandidate from "./assets/Candidate/Components/Courses/CourseDetails";
 import Test from "./assets/Candidate/test";
+import MyLearning from "./assets/Candidate/Components/Courses/MyLearning";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           element={<CourseDetailsCandidate />}
         />
         <Route path="/test" element={<Test />} />
+        <Route path="/my-learning" element={<MyLearning />} />
       </Routes>
     </Router>
   );
