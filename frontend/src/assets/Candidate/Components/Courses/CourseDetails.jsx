@@ -39,7 +39,9 @@ import {
   initiateRazorpayPayment,
   checkIfPurchased,
 } from "../../Services/paymentService";
-
+import toast from "react-hot-toast";
+import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
 const formatDuration = (seconds) => {
@@ -88,7 +90,6 @@ const CourseDetails = () => {
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [showFeedbackField, setShowFeedbackField] = useState(false);
 
-  // Fetch course details, videos, and check purchase status on component mount
   // Modified code for the useEffect that checks purchase status
 
   useEffect(() => {
@@ -118,19 +119,25 @@ const CourseDetails = () => {
               courseId,
               authToken
             );
+            console.log("API purchase check returned:", purchaseStatus);
 
+            // Always trust the API result first
             if (purchaseStatus.isPurchased) {
-              // Update localStorage with the server's response
               localStorage.setItem(`course_purchased_${courseId}`, "true");
               setIsPurchased(true);
             } else {
-              // If server says not purchased, check localStorage as fallback
-              // This handles the case where payment was successful but server verification failed
+              // If API says not purchased, but local storage says it is,
+              // we might have a pending server update. Log this discrepancy.
               const localPurchaseStatus = localStorage.getItem(
                 `course_purchased_${courseId}`
               );
 
               if (localPurchaseStatus === "true") {
+                console.log(
+                  "Warning: Local storage says purchased but API says not purchased"
+                );
+                // In this case, we'll trust local storage as the user may have just purchased
+                // and the server might not be updated yet
                 setIsPurchased(true);
               } else {
                 localStorage.setItem(`course_purchased_${courseId}`, "false");
@@ -173,7 +180,6 @@ const CourseDetails = () => {
 
     loadCourseData();
   }, [courseId]);
-
   // Fetch questions for the course
   useEffect(() => {
     const loadQuestions = async () => {
@@ -236,14 +242,14 @@ const CourseDetails = () => {
       const userId = userData?.userId;
 
       if (!authToken || !userId) {
-        alert("You need to be logged in to make a purchase");
+        toast.error("You need to be logged in to make a purchase");
         setProcessingPayment(false);
         return;
       }
 
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
-        alert("Failed to load Razorpay script");
+        toast.error("Failed to load Razorpay script");
         setProcessingPayment(false);
         return;
       }
@@ -266,7 +272,7 @@ const CourseDetails = () => {
         key: "rzp_test_SK0O9AqxC5BPs5",
         amount,
         currency,
-        name: "Course Enrollment",
+        name: `${course.title}`,
         description: `Enrollment for ${course.title}`,
         order_id: orderId,
         handler: async function (response) {
@@ -302,11 +308,11 @@ const CourseDetails = () => {
               localStorage.setItem(`course_purchased_${courseId}`, "true");
               setIsPurchased(true);
             } else {
-              alert("❌ Payment verification failed.");
+              toast.error("❌ Payment verification failed.");
             }
           } catch (error) {
             console.error("Payment verification error:", error);
-            alert("Payment verification failed. Please contact support.");
+            toast.error("Payment verification failed. Please contact support.");
           } finally {
             setProcessingPayment(false);
           }
@@ -315,9 +321,7 @@ const CourseDetails = () => {
           name: userData?.name,
           email: "",
         },
-        theme: {
-          color: "#3B82F6", // Blue color matching the UI
-        },
+
         modal: {
           ondismiss: function () {
             setProcessingPayment(false);
@@ -328,7 +332,7 @@ const CourseDetails = () => {
       initiateRazorpayPayment(options);
     } catch (error) {
       console.error("Payment error:", error);
-      alert("Something went wrong with the payment. Please try again.");
+      toast.error("Something went wrong with the payment. Please try again.");
       setProcessingPayment(false);
     }
   };
@@ -381,7 +385,7 @@ const CourseDetails = () => {
     } catch (err) {
       console.error("Error submitting question:", err);
       // Show error to user
-      alert(`Failed to submit question: ${err.message}`);
+      toast.error(`Failed to submit question: ${err.message}`);
     }
   };
 
@@ -431,7 +435,7 @@ const CourseDetails = () => {
       setAnswerText("");
     } catch (err) {
       console.error("Error submitting answer:", err);
-      alert(`Failed to submit answer: ${err.message}`);
+      toast.error(`Failed to submit answer: ${err.message}`);
     }
   };
 
@@ -604,6 +608,13 @@ const CourseDetails = () => {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-gray-50 py-14 px-2">
+      <Toaster
+        toastOptions={{
+          style: {
+            fontSize: "14px",
+          },
+        }}
+      />
       <Navbar />
 
       {/* Course Header */}

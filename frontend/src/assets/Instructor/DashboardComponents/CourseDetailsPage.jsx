@@ -31,6 +31,7 @@ import DashboardLayout from "../Components/InstructorDashboard/DashboardLayout";
 import { Link } from "react-router-dom";
 import AddVideoModal from "./AddVideoModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import toast from "react-hot-toast";
 
 // Format seconds to hours:minutes:seconds
 const formatDuration = (seconds) => {
@@ -162,7 +163,7 @@ const CourseDetailsPage = () => {
       setAnswerText("");
     } catch (err) {
       console.error("Error submitting answer:", err);
-      alert(`Failed to submit answer: ${err.message}`);
+      toast.error(`Failed to submit answer: ${err.message}`);
     }
   };
 
